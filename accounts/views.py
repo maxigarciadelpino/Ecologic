@@ -28,7 +28,7 @@ def register_view(request):
             user = form.save()  # crea el nuevo usuario
             login(request, user)  # inicia sesión automáticamente
             messages.success(request, "Cuenta creada correctamente")
-            return redirect("/accounts/")  # redirige a la página principal
+            return redirect("/accounts/")  # redirige a la pagina de cuentas
         else:
             messages.error(request, "Corrige los errores en el formulario.")
     else:

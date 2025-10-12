@@ -9,14 +9,22 @@
     <body>
         <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
         <ul>
+            {% if user.username == ''%}
             <li><a href="{% url 'login' %}">Iniciar sesión</a></li>
             <li><a href="{% url 'register' %}">Registrarse</a></li>
-            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+            {% endif %}
         </ul>
         <p>
+            {% if user.username != ''%}
             <p>Usuario: {{ user.username }}</p>
             <p>Último login: {{ user.last_login }}</p>
             <p>Fecha de registro: {{ user.date_joined }}</p>
+            {% endif %}
         </p>
+        <ul>
+            {% if user.username != ''%}
+            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+            {% endif %}
+        </ul>
     </body>
 </html>
