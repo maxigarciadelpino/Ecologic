@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-pm=ju9qf8t+lsp2#r6l&1qfm35f52njas$mr+p=)ti)$l5ma&e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 
 # Application definition
@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'EcoApp'
+    'EcoApp',
+    'mainpage'
 ]
 
 MIDDLEWARE = [
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'EcoLogic.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR/"template"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
