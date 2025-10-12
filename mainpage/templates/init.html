@@ -1,5 +1,5 @@
 <!Doctype html>
-<html
+<html>
     <head>
         <title>Pagina principal</title>
         <meta name="Pagina principal" content="Mainpage proyecto"/>
@@ -8,6 +8,17 @@
     </head>
 
     <body>
-        <p>Hola grupo</p>
+        <h1>EcoLogic</h1>
+        <ul>
+            <li><a href="About">Sobre nosotros</a></li>
+            <li><a href="{% url 'login' %}">Iniciar sesión</a></li>
+            <li><a href="{% url 'register' %}">Registrarse</a></li>
+            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+        </ul>
+        <p>Usuario: {{ user.username }}</p>
+        <p>Último login: {{ user.last_login }}</p>
+        <p>Fecha de registro: {{ user.date_joined }}</p>
+        <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. A in vero suscipit ut, ullam blanditiis unde amet, impedit illo quasi officia possimus repellendus odio veritatis nam quis ex sapiente sit itaque! Reiciendis molestias, sit recusandae adipisci, id rerum tempora aliquam deserunt aut minus velit dolore accusamus repellendus quasi aliquid illo quod ad. Dolore fuga officiis quibusdam nisi! Aliquid omnis incidunt provident laudantium, reiciendis in eligendi odio hic illum nulla autem repellat sapiente ex similique fugit expedita non error optio blanditiis commodi ducimus quisquam tempora molestias consectetur! Ut nihil doloremque, et vitae sunt soluta, modi unde eligendi molestiae rem dolor? Eum?</p>
+        <h2><a href="Recycler">Jugar</a></h2>
     </body>
 </html>
