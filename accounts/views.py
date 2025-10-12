@@ -11,7 +11,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("/")
+            return redirect("/accounts/")
         else:
             messages.error(request, "Usuario o contraseña incorrectos.")
 
@@ -19,7 +19,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("/")
+    return redirect("/accounts/")
 
 def register_view(request):
     if request.method == "POST":
@@ -28,10 +28,13 @@ def register_view(request):
             user = form.save()  # crea el nuevo usuario
             login(request, user)  # inicia sesión automáticamente
             messages.success(request, "Cuenta creada correctamente")
-            return redirect("/")  # redirige a la página principal
+            return redirect("/accounts/")  # redirige a la página principal
         else:
             messages.error(request, "Corrige los errores en el formulario.")
     else:
         form = UserCreationForm()
 
     return render(request, "register.html", {"form": form})
+
+def profile_view(request):
+    return render(request, "profile.html")
