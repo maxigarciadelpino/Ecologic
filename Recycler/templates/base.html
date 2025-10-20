@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz</title>
+
+  {% load static %}
+
+  <!-- Tailwind CSS (para estilos rápidos) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+  <!-- 🔝 Encabezado -->
+  <header class="bg-green-600 text-white py-4 shadow-md">
+    <div class="text-center text-2xl font-bold">
+      Ecologic
+    </div>
+  </header>
+
+  <!-- 🌍 Contenido principal -->
+  <main class="container mx-auto p-6">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- 👣 Pie de página -->
+  <footer class="bg-green-600 text-white text-center py-3 mt-10">
+    <p>© 2025 Ecologic | Hecho con Django </p>
+  </footer>
+
+</body>
+</html>

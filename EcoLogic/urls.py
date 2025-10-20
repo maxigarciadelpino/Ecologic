@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('mainpage.urls')),
     path('accounts/', include('accounts.urls')),
-
+    path('recycler/', include('Recycler.urls'))
 ]

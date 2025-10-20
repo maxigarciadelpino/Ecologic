@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Recycler</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
+        <header>
+            <h1>Quiz de reciclaje</h1>
+            <a>Puntajes</a>
+        </header>
+
+        <main>
+            <a href="{% url 'start_quiz'%}">Iniciar Quiz</a>
+
+            <section>
+                <div>
+                    <h2>Como Jugar</h2>
+                    <p>Contesta las preguntas acerca de reciclaje e intenta conseguir la mayor cantidad de puntos!</p>
+                </div>
+
+                <div>
+                    <h2>Aprende mas sobre reciclaje</h2>
+                    <p>Reciclar ayuda a proteger el medio ambiente y el planeta!</p>
+                </div>
+            </section>
+        </main>
+
+    </body>
+</html>

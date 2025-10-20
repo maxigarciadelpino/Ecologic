@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'EcoApp',
     'mainpage',
     'accounts',
+    'Recycler',
 ]
 
 MIDDLEWARE = [

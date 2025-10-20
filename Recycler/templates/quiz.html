@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-screen bg-blue-50">
+  <h2 class="text-2xl font-bold mb-4">
+    Pregunta <span id="q-number">1</span>/10
+  </h2>
+
+  <!-- Imagen inicial de respaldo -->
+  <img id="q-image" src="{% static 'recycler/images/plastico1.png' %}" alt="Imagen basura"
+       class="w-64 h-64 object-contain mb-4">
+
+  <div id="options" class="grid grid-cols-2 gap-4 mb-6">
+    <!-- Las opciones se cargarán dinámicamente por JS -->
+  </div>
+
+  <p>⏳ Tiempo restante: <span id="timer">10</span>s</p>
+  <p>Puntaje: <span id="score">0</span></p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Datos de preguntas recibidos desde la vista Django
+  const questions = {{ questions|safe }};
+  let qIndex = 0;
+  let score = 0;
+  let timer = 10;
+  let interval;
+
+  // Función principal que carga cada pregunta
+  function loadQuestion() {
+    // Si no quedan más preguntas, redirigir a resultados
+    if (qIndex >= questions.length) {
+      window.location.href = "{% url 'results' %}?score=" + score;
+      return;
+    }
+
+    const q = questions[qIndex];
+
+    // Actualizar número de pregunta
+    document.getElementById("q-number").textContent = qIndex + 1;
+
+    // Actualizar imagen
+    document.getElementById("q-image").src = "/static/" + q.image;
+
+    // Generar opciones dinámicamente
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+    q.options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.className = "option-btn bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600";
+      btn.onclick = () => checkAnswer(opt);
+      optionsDiv.appendChild(btn);
+    });
+
+    // Reiniciar el temporizador
+    timer = 10;
+    document.getElementById("timer").textContent = timer;
+    clearInterval(interval);
+    interval = setInterval(() => {
+      timer--;
+      document.getElementById("timer").textContent = timer;
+      if (timer <= 0) {
+        clearInterval(interval);
+        nextQuestion();
+      }
+    }, 1000);
+  }
+
+  // Comprobar respuesta
+  function checkAnswer(selected) {
+    const correct = questions[qIndex].correct;
+    if (selected === correct) {
+      score += timer * 100;
+    }
+    document.getElementById("score").textContent = score;
+    clearInterval(interval);
+    nextQuestion();
+  }
+
+  // Pasar a la siguiente pregunta
+  function nextQuestion() {
+    qIndex++;
+    loadQuestion();
+  }
+
+  // Cargar la primera pregunta al inicio
+  loadQuestion();
+});
+</script>
+{% endblock %}
