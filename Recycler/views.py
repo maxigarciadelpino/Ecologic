@@ -8,61 +8,64 @@ import datetime
 
 @login_required
 def results_view(request):
-    score = int(request.GET.get("score", 0))
-    user = request.user
+    puntaje = int(request.GET.get("puntaje", 0))
+    usuario = request.user
 
-    # Obtener o crear las estadísticas
-    stats, _ = UserStats.objects.get_or_create(user=user)
+    # Obtener o crear las estadísticas del usuario
+    estadisticas, _ = UserStats.objects.get_or_create(user=usuario)
 
-    # 1️⃣ Actualizar puntaje total
-    stats.total_score += score
+    # Actualizar puntaje total
+    estadisticas.total_score += puntaje
 
-    # 2️⃣ Calcular puntaje promedio (redondeado a la centena)
-    games_played = getattr(user, "games_played", 0) + 1
-    avg_score = round(stats.total_score / games_played, -2)
-    stats.avg_score = int(avg_score)
-    user.games_played = games_played  # solo temporal si aún no tienes un campo en BD
+    # Calcular el puntaje promedio (redondeado a la centena más cercana)
+    partidas_jugadas = getattr(usuario, "partidas_jugadas", 0) + 1
+    puntaje_promedio = round(estadisticas.total_score / partidas_jugadas, -2)
+    estadisticas.avg_score = int(puntaje_promedio)
+    usuario.partidas_jugadas = partidas_jugadas
 
-    # 3️⃣ Actualizar racha máxima global
-    current_streak = request.session.get("current_streak", 0)
-    if current_streak > stats.max_streak:
-        stats.max_streak = current_streak
+    # Actualizar la racha máxima global
+    racha_actual = request.session.get("racha_actual", 0)
+    if racha_actual > estadisticas.max_streak:
+        estadisticas.max_streak = racha_actual
 
-    # 4️⃣ Actualizar días consecutivos jugando
-    today = timezone.now().date()
-    last_play_date = getattr(stats, "last_play_date", None)
-    if hasattr(stats, "last_play_date"):
-        if last_play_date == today - datetime.timedelta(days=1):
-            stats.consecutive_days += 1
-        elif last_play_date != today:
-            stats.consecutive_days = 1
+    # Actualizar los días consecutivos jugando
+    hoy = timezone.now().date()
+    ultima_fecha_jugada = getattr(estadisticas, "last_play_date", None)
+    if hasattr(estadisticas, "last_play_date"):
+        if ultima_fecha_jugada == hoy - datetime.timedelta(days=1):
+            estadisticas.consecutive_days += 1
+        elif ultima_fecha_jugada != hoy:
+            estadisticas.consecutive_days = 1
     else:
-        stats.consecutive_days = 1
-    stats.last_play_date = today
+        estadisticas.consecutive_days = 1
+    estadisticas.last_play_date = hoy
 
-    # 5️⃣ (Opcional) Tiempo promedio de respuesta
-    avg_response_time = request.session.get("avg_response_time", None)
-    if avg_response_time:
-        # Si ya había datos previos, hacer promedio nuevo
-        if stats.avg_response_time == 0:
-            stats.avg_response_time = avg_response_time
+    # (Opcional) Calcular tiempo promedio de respuesta
+    tiempo_promedio_respuesta = request.session.get("tiempo_promedio_respuesta", None)
+    if tiempo_promedio_respuesta:
+        # Si ya había datos previos, recalcular el promedio
+        if estadisticas.avg_response_time == 0:
+            estadisticas.avg_response_time = tiempo_promedio_respuesta
         else:
-            stats.avg_response_time = (stats.avg_response_time + avg_response_time) / 2
+            estadisticas.avg_response_time = (
+                estadisticas.avg_response_time + tiempo_promedio_respuesta
+            ) / 2
 
-    # Guardar cambios
-    stats.save()
+    # Guardar los cambios en la base de datos
+    estadisticas.save()
 
-    return render(request, "results.html", {"score": score})
+    return render(request, "results.html", {"puntaje": puntaje})
 
 
-# Vista principal (menú del reciclador)
+# Vista principal (menú del juego)
 def recycler_view(request):
     return render(request, "recycler.html")
 
-# Vista del quiz
+
+# Vista del quiz (preguntas del juego)
 def quiz_view(request):
-    # Lista de preguntas (con rutas relativas a /static/)
-    QUESTIONS = [
+    # Lista de preguntas (con sus imágenes y respuestas correctas)
+    PREGUNTAS = [
         {"image": "recycler/images/plastico.png", "correct": "Plástico", "options": ["Plástico", "Metal", "Vidrio", "Papel"]},
         {"image": "recycler/images/plastico2.png", "correct": "Plástico", "options": ["Plástico", "Metal", "Vidrio", "Papel"]},
         {"image": "recycler/images/plastico3.png", "correct": "Plástico", "options": ["Plástico", "Metal", "Vidrio", "Papel"]},
@@ -77,15 +80,15 @@ def quiz_view(request):
         {"image": "recycler/images/vidrio3.png", "correct": "Vidrio", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
     ]
 
-    # Mezclar preguntas y seleccionar 10
-    random.shuffle(QUESTIONS)
-    selected_questions = QUESTIONS[:10]
+    # Mezclar las preguntas y seleccionar 10 al azar
+    random.shuffle(PREGUNTAS)
+    preguntas_seleccionadas = PREGUNTAS[:10]
 
-    # Mostrar la vista de la pagina con las preguntas seleccionadas
-    return render(request, "quiz.html", {"questions": selected_questions})
+    # Renderizar la plantilla del quiz con las preguntas
+    return render(request, "quiz.html", {"questions": preguntas_seleccionadas})
 
 
-# Vista de resultados
+# Vista de resultados (simple, usada al final del juego)
 def results_view(request):
-    score = request.GET.get("score", 0)
-    return render(request, "results.html", {"score": score})
+    puntaje = request.GET.get("puntaje", 0)
+    return render(request, "results.html", {"puntaje": puntaje})

@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="flex flex-col items-center justify-center min-h-screen bg-green-50">
-  <h2 class="text-2xl font-bold mb-4">¡Juego terminado! 🏁</h2>
-  <p class="text-xl mb-6">Tu puntaje final es: <strong>{{ score }}</strong></p>
+  <h2 class="text-2xl font-bold mb-4">¡Juego terminado!</h2>
+  <p class="text-xl mb-6">Tu puntaje final es: <strong>{{ puntaje }}</strong></p>
 
   <!-- Redireccion a el inicio del juego -->
   <a href="{% url 'start_quiz' %}" 
