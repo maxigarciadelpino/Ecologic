@@ -1,92 +1,189 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen bg-blue-50">
-  <h2 class="text-2xl font-bold mb-4">
-    Pregunta <span id="q-number">1</span>/10
-  </h2>
-
-  <!-- Imagen inicial de respaldo -->
-  <img id="q-image" src="{% static 'recycler/images/plastico1.png' %}" alt="Imagen basura"
-       class="w-64 h-64 object-contain mb-4">
-
-  <div id="options" class="grid grid-cols-2 gap-4 mb-6">
-    <!-- Las opciones se cargarán dinámicamente por JS -->
+<div class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+  
+  <!-- Pantalla de cuenta regresiva -->
+  <div id="pantalla-cuenta" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50">
+    <div class="text-center">
+      <h2 class="text-6xl font-bold text-white mb-4">¿Listo?</h2>
+      <p id="numero-cuenta" class="text-9xl font-bold text-green-500">3</p>
+    </div>
   </div>
 
-  <p>⏳ Tiempo restante: <span id="timer">10</span>s</p>
-  <p>Puntaje: <span id="score">0</span></p>
+  <h2 class="text-2xl font-bold mb-8">
+    Pregunta <span id="numero-pregunta">1</span>/10
+  </h2>
+  
+  <!-- Imagen de la pregunta -->
+  <div class="relative flex items-center justify-center mb-8">
+    <div class="flex flex-col items-center">
+      <!-- Barra de tiempo -->
+      <div class="w-[512px] h-2 bg-gray-300 rounded mb-4 overflow-hidden">
+        <div id="barra-tiempo" class="h-full bg-black transition-none" style="width: 100%;"></div>
+      </div>
+      
+      <!-- Imagen principal -->
+      <img id="imagen-pregunta"
+           src="{% static 'recycler/images/plastico1.png' %}"
+           alt="Imagen basura"
+           class="w-[512px] h-[512px] object-contain rounded-lg shadow-lg bg-white">
+    </div>
+    
+    <!-- Panel de puntaje y racha -->
+    <div class="absolute left-[calc(50%+280px)] top-6">
+      <div class="bg-white p-6 rounded-lg shadow-md min-w-[200px]">
+        <p class="text-xl font-bold mb-4">
+          Puntaje: <span id="puntaje" class="text-green-600">0</span>
+        </p>
+        <p class="text-lg font-semibold">
+          Racha: <span id="racha" class="text-orange-500">0</span>
+        </p>
+        <p id="retroalimentacion" class="text-md font-bold text-gray-700 mt-4"></p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Opciones -->
+  <div id="opciones" class="grid grid-cols-2 gap-4 mt-4"></div>
 </div>
-
+<!-- Definicion de variables  -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // Datos de preguntas recibidos desde la vista Django
-  const questions = {{ questions|safe }};
-  let qIndex = 0;
-  let score = 0;
-  let timer = 10;
-  let interval;
+  const preguntas = {{ questions|safe }};
+  let indice = 0; // numero de pregunta
+  let puntaje = 0; // puntaje del juego
+  let racha = 0; // racha del jugador
+  let tiempo = 10; // tiempo para responder cada pregunta
+  let intervalo; // auxiliar del temporizador
+  let respondido = false; // Bool para saber si una regunta esta respondida
+  
+ // se vinculan las variables con un elmento del DOM html
 
-  // Función principal que carga cada pregunta
-  function loadQuestion() {
-    // Si no quedan más preguntas, redirigir a resultados
-    if (qIndex >= questions.length) {
-      window.location.href = "{% url 'results' %}?score=" + score;
-      return;
-    }
-
-    const q = questions[qIndex];
-
-    // Actualizar número de pregunta
-    document.getElementById("q-number").textContent = qIndex + 1;
-
-    // Actualizar imagen
-    document.getElementById("q-image").src = "/static/" + q.image;
-
-    // Generar opciones dinámicamente
-    const optionsDiv = document.getElementById("options");
-    optionsDiv.innerHTML = "";
-    q.options.forEach(opt => {
-      const btn = document.createElement("button");
-      btn.textContent = opt;
-      btn.className = "option-btn bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600";
-      btn.onclick = () => checkAnswer(opt);
-      optionsDiv.appendChild(btn);
-    });
-
-    // Reiniciar el temporizador
-    timer = 10;
-    document.getElementById("timer").textContent = timer;
-    clearInterval(interval);
-    interval = setInterval(() => {
-      timer--;
-      document.getElementById("timer").textContent = timer;
-      if (timer <= 0) {
-        clearInterval(interval);
-        nextQuestion();
+  const barraTiempo = document.getElementById("barra-tiempo");
+  const retroalimentacion = document.getElementById("retroalimentacion");
+  const puntajeEl = document.getElementById("puntaje");
+  const rachaEl = document.getElementById("racha");
+  const pantallaCuenta = document.getElementById("pantalla-cuenta");
+  const numeroCuenta = document.getElementById("numero-cuenta");
+  
+  // Funcion cuenta regresiva que se muestra al comenzar el juego
+  function mostrarCuentaRegresiva() {
+    let cuenta = 3;
+    numeroCuenta.textContent = cuenta;
+    // Modifica la cuenta regresiva para irla bajando cada segundo
+    const intervaloCuenta = setInterval(() => {
+      cuenta--;
+      if (cuenta > 0) {
+        numeroCuenta.textContent = cuenta;
+      } else if (cuenta === 0) {
+        numeroCuenta.textContent = "¡Ya!";
+        numeroCuenta.className = "text-9xl font-bold text-yellow-400";
+      } else {
+        clearInterval(intervaloCuenta);
+        pantallaCuenta.style.display = "none";
+        cargarPregunta();
       }
     }, 1000);
   }
+  // muestra la cuenta regresiva al ingresar a la pagina 
+  mostrarCuentaRegresiva();
 
-  // Comprobar respuesta
-  function checkAnswer(selected) {
-    const correct = questions[qIndex].correct;
-    if (selected === correct) {
-      score += timer * 100;
+  //Saca una pregunta de la base de datos para cargarla en la pagina
+  function cargarPregunta() {
+    // si 10 preguntas fueron respondidas te redirige a los resultados
+    if (indice >= preguntas.length) {
+      window.location.href = "{% url 'results' %}?puntaje=" + puntaje;
+      return;
     }
-    document.getElementById("score").textContent = score;
-    clearInterval(interval);
-    nextQuestion();
-  }
+    // Actualiza algunos parametros correspondientes a la pregunta
+    respondido = false;
+    const pregunta = preguntas[indice];
+    document.getElementById("numero-pregunta").textContent = indice + 1;
+    document.getElementById("imagen-pregunta").src = "/static/" + pregunta.image;
+    retroalimentacion.textContent = "";
+    // Carga las posubles opciones de la pregunta
+    const opcionesDiv = document.getElementById("opciones");
+    opcionesDiv.innerHTML = "";
 
-  // Pasar a la siguiente pregunta
-  function nextQuestion() {
-    qIndex++;
-    loadQuestion();
-  }
+    // colores por boton
+    const colores = {
+      "Papel": "bg-blue-500 hover:bg-blue-600",
+      "Plástico": "bg-yellow-400 hover:bg-yellow-500",
+      "Vidrio": "bg-green-500 hover:bg-green-600",
+      "Metal": "bg-gray-300 hover:bg-gray-400 text-gray-800"
+    };
+    
+    // Carga las funciones de cada boton por separado
+    pregunta.options.forEach(opcion => {
+      const boton = document.createElement("button");
+      boton.textContent = opcion;
+      const colorClase = colores[opcion] || "bg-green-500 hover:bg-green-600";
+      const colorTexto = opcion === "Metal" ? "text-gray-800" : "text-white";
+      boton.className = `boton-opcion ${colorClase} ${colorTexto} py-4 px-8 rounded-lg font-bold text-xl transition-colors shadow-md`;
+      boton.onclick = () => verificarRespuesta(opcion);
+      opcionesDiv.appendChild(boton);
+    });
 
-  // Cargar la primera pregunta al inicio
-  loadQuestion();
+    // Define la barra de tiempo y la actualiza
+    tiempo = 10;
+    actualizarBarraTiempo();
+    clearInterval(intervalo);
+    
+    // Cuenta regresiva de la barra de tiempo
+    setTimeout(() => {
+      intervalo = setInterval(() => {
+        tiempo--;
+        actualizarBarraTiempo();
+        // cuando el tiempo es 0 reinicia la racha y la cobra la pregunta como mala
+        if (tiempo <= 0) {
+          clearInterval(intervalo);
+          respondido = true;
+          racha = 0;
+          rachaEl.textContent = racha;
+          siguientePregunta();
+        }
+      }, 1000);
+    }, 1000);
+  }
+  // Actualiza la barra de tiempo
+  function actualizarBarraTiempo() {
+    barraTiempo.style.width = (tiempo * 10) + "%";
+  }
+  // Verifica si la respuesta es correcta y retorna true o false dependiendo si esta bien o mal y bloquea los botones para evitar bugs
+  function verificarRespuesta(seleccionada) {
+    if (respondido) return;
+    respondido = true;
+
+    const botones = document.querySelectorAll('.boton-opcion');
+    botones.forEach(boton => {
+      boton.disabled = true;
+      boton.style.opacity = '0.6';
+      boton.style.cursor = 'not-allowed';
+    });
+// sistema de recompensa de puntaje y racha, Putaje = Tiempo * 100, y la racha aumenta en 1 cada vez que es respondido correctamente, en caso de no ser asi, se otorgan 0 puntos y se reinicia la racha
+    const correcta = preguntas[indice].correct;
+    if (seleccionada === correcta) {
+      puntaje += tiempo * 100;
+      racha++;
+      retroalimentacion.textContent = "✅ ¡Correcto!";
+      retroalimentacion.className = "text-green-600 font-bold text-lg mt-4";
+    } else {
+      racha = 0;
+      retroalimentacion.textContent = "❌ Incorrecto. La respuesta correcta era: " + correcta;
+      retroalimentacion.className = "text-red-600 font-bold text-lg mt-4";
+    }
+// Actualiza el puntaje y lo muestra en pantalla
+    puntajeEl.textContent = puntaje;
+    rachaEl.textContent = racha;
+    clearInterval(intervalo);
+    setTimeout(siguientePregunta, 1500);
+  }
+// Carga la siguiente pregunta
+  function siguientePregunta() {
+    indice++;
+    cargarPregunta();
+  }
 });
 </script>
 {% endblock %}
