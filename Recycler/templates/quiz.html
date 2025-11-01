@@ -164,13 +164,13 @@ document.addEventListener("DOMContentLoaded", () => {
 // sistema de recompensa de puntaje y racha, Putaje = Tiempo * 100, y la racha aumenta en 1 cada vez que es respondido correctamente, en caso de no ser asi, se otorgan 0 puntos y se reinicia la racha
     const correcta = preguntas[indice].correct;
     if (seleccionada === correcta) {
-      puntaje += tiempo * 100;
+      puntaje += tiempo * 100 + racha * 50;
       racha++;
-      retroalimentacion.textContent = "✅ ¡Correcto!";
+      retroalimentacion.textContent = "¡Correcto!";
       retroalimentacion.className = "text-green-600 font-bold text-lg mt-4";
     } else {
       racha = 0;
-      retroalimentacion.textContent = "❌ Incorrecto. La respuesta correcta era: " + correcta;
+      retroalimentacion.textContent = "Incorrecto, La respuesta correcta era: " + correcta;
       retroalimentacion.className = "text-red-600 font-bold text-lg mt-4";
     }
 // Actualiza el puntaje y lo muestra en pantalla
