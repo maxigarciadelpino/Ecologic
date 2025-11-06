@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from accounts.models import UserStats
 
 def login_view(request):
     if request.method == "POST":
@@ -37,4 +39,11 @@ def register_view(request):
     return render(request, "register.html", {"form": form})
 
 def profile_view(request):
-    return render(request, "profile.html")
+    usuario = request.user
+
+    if not usuario.is_authenticated:
+        return render(request, "profile.html", {"usuario": None, "estadisticas": None})
+
+    estadisticas = UserStats.objects.get(user=usuario)
+
+    return render(request, "profile.html", {"usuario": usuario, "estadisticas": estadisticas})

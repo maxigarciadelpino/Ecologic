@@ -12,9 +12,8 @@ class UserStats(models.Model):
         verbose_name="Usuario"
     )
     total_score = models.IntegerField(default=0, verbose_name="Puntaje total")
+    games_played = models.IntegerField(default=0, verbose_name="Partidas jugadas")
     consecutive_days = models.IntegerField(default=0, verbose_name="Días consecutivos jugando")
-    max_streak = models.IntegerField(default=0, verbose_name="Racha máxima global")
-    avg_response_time = models.FloatField(default=0.0, verbose_name="Tiempo promedio de respuesta (s)")
     avg_score = models.IntegerField(default=0, verbose_name="Puntaje promedio")
     last_play_date = models.DateField(null=True, blank=True, verbose_name="Última fecha jugada")
 

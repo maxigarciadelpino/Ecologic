@@ -3,28 +3,37 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <link rel="stylesheet" href="">
+        <title>Perfil</title>
     </head>
+
     <body>
+
         <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
+
+        <!-- Si el usuario NO está autenticado -->
+        {% if not user.is_authenticated %}
+            <ul>
+                <li><a href="{% url 'login' %}">Iniciar sesión</a></li>
+                <li><a href="{% url 'register' %}">Registrarse</a></li>
+            </ul>
+        {% else %}
+
+        <h2>Información del usuario</h2>
+        <p>Usuario: {{ usuario.username }}</p>
+        <p>Último login: {{ usuario.last_login }}</p>
+        <p>Fecha de registro: {{ usuario.date_joined }}</p>
+
+        <h2>Estadísticas del usuario</h2>
+        <p>Puntaje total: {{ estadisticas.total_score }}</p>
+        <p>Puntaje promedio: {{ estadisticas.avg_score }}</p>
+        <p>Días consecutivos jugando: {{ estadisticas.consecutive_days }}</p>
+        <p>Última fecha jugada: {{ estadisticas.last_play_date }}</p>
+
         <ul>
-            {% if user.username == ''%}
-            <li><a href="{% url 'login' %}">Iniciar sesión</a></li>
-            <li><a href="{% url 'register' %}">Registrarse</a></li>
-            {% endif %}
-        </ul>
-        <p>
-            {% if user.username != ''%}
-            <p>Usuario: {{ user.username }}</p>
-            <p>Último login: {{ user.last_login }}</p>
-            <p>Fecha de registro: {{ user.date_joined }}</p>
-            {% endif %}
-        </p>
-        <ul>
-            {% if user.username != ''%}
             <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-            {% endif %}
         </ul>
+
+        {% endif %}
+
     </body>
 </html>

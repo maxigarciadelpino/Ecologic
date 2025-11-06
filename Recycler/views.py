@@ -4,58 +4,7 @@ from django.utils import timezone
 from accounts.models import UserStats
 import random
 import datetime
-
-
-@login_required
-def results_view(request):
-    puntaje = int(request.GET.get("puntaje", 0))
-    usuario = request.user
-
-    # Obtener o crear las estadísticas del usuario
-    estadisticas, _ = UserStats.objects.get_or_create(user=usuario)
-
-    # Actualizar puntaje total
-    estadisticas.total_score += puntaje
-
-    # Calcular el puntaje promedio (redondeado a la centena más cercana)
-    partidas_jugadas = getattr(usuario, "partidas_jugadas", 0) + 1
-    puntaje_promedio = round(estadisticas.total_score / partidas_jugadas, -2)
-    estadisticas.avg_score = int(puntaje_promedio)
-    usuario.partidas_jugadas = partidas_jugadas
-
-    # Actualizar la racha máxima global
-    racha_actual = request.session.get("racha_actual", 0)
-    if racha_actual > estadisticas.max_streak:
-        estadisticas.max_streak = racha_actual
-
-    # Actualizar los días consecutivos jugando
-    hoy = timezone.now().date()
-    ultima_fecha_jugada = getattr(estadisticas, "last_play_date", None)
-    if hasattr(estadisticas, "last_play_date"):
-        if ultima_fecha_jugada == hoy - datetime.timedelta(days=1):
-            estadisticas.consecutive_days += 1
-        elif ultima_fecha_jugada != hoy:
-            estadisticas.consecutive_days = 1
-    else:
-        estadisticas.consecutive_days = 1
-    estadisticas.last_play_date = hoy
-
-    # (Opcional) Calcular tiempo promedio de respuesta
-    tiempo_promedio_respuesta = request.session.get("tiempo_promedio_respuesta", None)
-    if tiempo_promedio_respuesta:
-        # Si ya había datos previos, recalcular el promedio
-        if estadisticas.avg_response_time == 0:
-            estadisticas.avg_response_time = tiempo_promedio_respuesta
-        else:
-            estadisticas.avg_response_time = (
-                estadisticas.avg_response_time + tiempo_promedio_respuesta
-            ) / 2
-
-    # Guardar los cambios en la base de datos
-    estadisticas.save()
-
-    return render(request, "results.html", {"puntaje": puntaje})
-
+from django.contrib.auth.models import AnonymousUser
 
 # Vista principal (menú del juego)
 def recycler_view(request):
@@ -87,8 +36,39 @@ def quiz_view(request):
     # Renderizar la plantilla del quiz con las preguntas
     return render(request, "quiz.html", {"questions": preguntas_seleccionadas})
 
-
-# Vista de resultados (simple, usada al final del juego)
 def results_view(request):
-    puntaje = request.GET.get("puntaje", 0)
+    puntaje = int(request.GET.get("puntaje", 0))
+    usuario = request.user
+
+    if isinstance(usuario, AnonymousUser):
+        return render(request, "results.html", {"puntaje": puntaje})
+
+    estadisticas, _ = UserStats.objects.get_or_create(user=usuario)
+    estadisticas.total_score += puntaje
+    estadisticas.games_played = (estadisticas.games_played or 0) + 1
+
+    if estadisticas.games_played > 0:
+        promedio = estadisticas.total_score / estadisticas.games_played
+        promedio_redondeado = round(promedio, -2)
+        estadisticas.avg_score = int(promedio_redondeado)
+    else:
+        estadisticas.avg_score = 0
+
+    # Actualizar los días consecutivos jugando
+    hoy = timezone.now().date()
+    ultima_fecha_jugada = estadisticas.last_play_date
+
+    if ultima_fecha_jugada == hoy - datetime.timedelta(days=1):
+        estadisticas.consecutive_days += 1
+    elif ultima_fecha_jugada != hoy:
+        estadisticas.consecutive_days = 1
+
+    estadisticas.last_play_date = hoy
+
+    estadisticas.save()
+
     return render(request, "results.html", {"puntaje": puntaje})
+
+def leaderboard_view(request):
+    jugadores = UserStats.objects.filter(games_played__gte=3).order_by("-consecutive_days", "-avg_score")[:100]
+    return render(request, "leaderboard.html", {"jugadores": jugadores, "enumerate": enumerate})

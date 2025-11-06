@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.recycler_view, name='recycler'),
     path('quiz/', views.quiz_view, name='start_quiz'),
     path('results/', views.results_view, name='results'),
+    path('leaderboards/', views.leaderboard_view, name='leaderboard'),
 ]

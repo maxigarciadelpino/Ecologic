@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Rankings</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
+        <a href="{% url 'recycler'%}">Volver</a>
+        <h1>Rankings</h1>
+            <table border="1">
+                <tr>
+                    <th>Posición</th>
+                    <th>Usuario</th>
+                    <th>Días consecutivos</th>
+                    <th>Puntaje promedio</th>
+                    <th>Partidas jugadas</th>
+                </tr>
+
+                {% for j in jugadores %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ j.user.username }}</td>
+                    <td>{{ j.consecutive_days }}</td>
+                    <td>{{ j.avg_score }}</td>
+                    <td>{{ j.games_played }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </h1>
+    </body>
+</html>
