@@ -15,18 +15,18 @@ def recycler_view(request):
 def quiz_view(request):
     # Lista de preguntas (con sus imágenes y respuestas correctas)
     PREGUNTAS = [
-        {"image": "recycler/images/plastico.png", "correct": "Plástico", "options": ["Plástico", "Metal", "Vidrio", "Papel"]},
-        {"image": "recycler/images/plastico2.png", "correct": "Plástico", "options": ["Plástico", "Metal", "Vidrio", "Papel"]},
-        {"image": "recycler/images/plastico3.png", "correct": "Plástico", "options": ["Plástico", "Metal", "Vidrio", "Papel"]},
-        {"image": "recycler/images/papel.png", "correct": "Papel", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/papel2.png", "correct": "Papel", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/papel3.png", "correct": "Papel", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/metal.png", "correct": "Metal", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/metal2.png", "correct": "Metal", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/metal3.png", "correct": "Metal", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/vidrio.png", "correct": "Vidrio", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/vidrio2.png", "correct": "Vidrio", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
-        {"image": "recycler/images/vidrio3.png", "correct": "Vidrio", "options": ["Papel", "Plástico", "Vidrio", "Metal"]},
+        {"image": "recycler/images/plastico.png", "correct": "Plástico y Latas", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/plastico2.png", "correct": "Plástico y Latas", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/plastico3.png", "correct": "Plástico y Latas", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/papel.png", "correct": "Papel", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/papel2.png", "correct": "Papel", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/papel3.png", "correct": "Papel", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/metal.png", "correct": "Plástico y Latas", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/metal2.png", "correct": "Plástico y Latas", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/metal3.png", "correct": "Plástico y Latas", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/vidrio.png", "correct": "Vidrio", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/vidrio2.png", "correct": "Vidrio", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
+        {"image": "recycler/images/vidrio3.png", "correct": "Vidrio", "options": ["Plástico y Latas", "Electronicos", "Vidrio", "Papel"]},
     ]
 
     # Mezclar las preguntas y seleccionar 10 al azar
@@ -70,5 +70,5 @@ def results_view(request):
     return render(request, "results.html", {"puntaje": puntaje})
 
 def leaderboard_view(request):
-    jugadores = UserStats.objects.filter(games_played__gte=3).order_by("-consecutive_days", "-avg_score")[:100]
-    return render(request, "leaderboard.html", {"jugadores": jugadores, "enumerate": enumerate})
+    jugadores = UserStats.objects.filter(games_played__gte=3).select_related('user__profile').order_by("-consecutive_days", "-avg_score")[:100]
+    return render(request, "leaderboard.html", {"jugadores": jugadores})

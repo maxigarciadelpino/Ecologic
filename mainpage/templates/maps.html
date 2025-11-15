@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+</head>
+<body>
+<div id="map" style="height: 100vh;"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<script>
+const iconoVerde = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+let mapa = L.map('map').setView([-33.45, -70.66], 13);
+let grupoMarcadores = L.markerClusterGroup();
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contribuyentes'
+}).addTo(mapa);
+
+function obtenerUbicacion() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        L.marker([lat, lon]).bindPopup("Estás aquí").addTo(mapa).openPopup();
+        mapa.setView([lat, lon], 13);
+        cargarPuntos(lat, lon);
+    });
+}
+
+function cargarPuntos(lat, lon) {
+    fetch(`/api/puntos-verdes/?lat=${lat}&lon=${lon}`)
+        .then(resp => resp.json())
+        .then(data => {
+            grupoMarcadores.clearLayers();
+            data.puntos.forEach(p => {
+                let nombre = p.nombre;
+                if (nombre === "Centro de reciclaje (container)" || nombre.includes("(container)")) {
+                    nombre = "Punto de reciclaje";
+                }
+                const m = L.marker([p.lat, p.lon], { icon: iconoVerde }).bindPopup(nombre);
+                grupoMarcadores.addLayer(m);
+            });
+            mapa.addLayer(grupoMarcadores);
+        })
+        .catch(() => alert("Error cargando puntos verdes"));
+}
+
+obtenerUbicacion();
+</script>
+</body>
+</html>

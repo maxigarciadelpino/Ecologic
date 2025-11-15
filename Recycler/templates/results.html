@@ -4,15 +4,89 @@
   <h2 class="text-2xl font-bold mb-4">¡Juego terminado!</h2>
   <p class="text-xl mb-6">Tu puntaje final es: <strong>{{ puntaje }}</strong></p>
 
-  <!-- Redireccion a el inicio del juego -->
-  <a href="{% url 'start_quiz' %}" 
-     class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-     Volver a jugar 🔁
-  </a>
-  <!-- Enlace al menu del juego -->
+  <!-- Pregunta-->
+  <form id="residuoForm" class="flex flex-col items-center space-y-3">
+    <p>
+      Hoy vi un residuo llamado:
+      <input 
+        type="text" 
+        id="basura" 
+        name="basura" 
+        placeholder="Ej: Lata"
+        required
+        class="border border-gray-400 rounded p-1"
+      >
+      y lo reciclé en el contenedor de color:
+      <input 
+        type="text" 
+        id="cont" 
+        name="cont" 
+        placeholder="Amarillo"
+        required
+        class="border border-gray-400 rounded p-1"
+      >
+    </p>
+
+    <!-- Imagen -->
+    <label for="imagen">!Sube una imagen de tu reciclaje y muestranos tu buena accion!</label>
+    <input 
+      type="file" 
+      id="imagen" 
+      name="imagen" 
+      accept=".png, .jpg, .jpeg, image/png, image/jpeg"
+      class="border border-gray-400 rounded p-1"
+    >
+
+    <!-- Botón desactivado hasta completar -->
+    <a href="{% url 'start_quiz' %}" 
+       id="btnJugar"
+       class="bg-gray-400 text-white px-4 py-2 rounded pointer-events-none"
+       aria-disabled="true">
+       Volver a jugar
+    </a>
+  </form>
+
+  <!-- Menu principal -->
   <a href="{% url 'recycler' %}" 
      class="mt-4 text-blue-700 underline">
      Volver al inicio
   </a>
 </div>
+
+<script>
+  const basuraInput = document.getElementById('basura');
+  const contInput = document.getElementById('cont');
+  const botonJugar = document.getElementById('btnJugar');
+  const imagenInput = document.getElementById('imagen');
+
+  function verificarCampos() {
+    const basuraValida = basuraInput.value.trim() !== "";
+    const contValido = contInput.value.trim() !== "";
+    let imagenValida = true;
+
+    if (imagenInput.files.length > 0) {
+      const archivo = imagenInput.files[0];
+      const tipo = archivo.type;
+      if (!(tipo === "image/png" || tipo === "image/jpeg")) {
+        alert("Solo se permiten archivos PNG o JPG");
+        imagenInput.value = "";
+        imagenValida = false;
+      }
+    }
+
+    if (basuraValida && contValido && imagenValida) {
+      botonJugar.classList.remove("bg-gray-400", "pointer-events-none");
+      botonJugar.classList.add("bg-blue-500", "hover:bg-blue-600");
+      botonJugar.removeAttribute("aria-disabled");
+    } else {
+      botonJugar.classList.add("bg-gray-400", "pointer-events-none");
+      botonJugar.classList.remove("bg-blue-500", "hover:bg-blue-600");
+      botonJugar.setAttribute("aria-disabled", "true");
+    }
+  }
+
+  basuraInput.addEventListener('input', verificarCampos);
+  contInput.addEventListener('input', verificarCampos);
+  imagenInput.addEventListener('change', verificarCampos);
+</script>
 {% endblock %}

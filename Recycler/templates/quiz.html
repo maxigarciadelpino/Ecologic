@@ -1,189 +1,526 @@
-{% extends "base.html" %}
 {% load static %}
-{% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-  
-  <!-- Pantalla de cuenta regresiva -->
-  <div id="pantalla-cuenta" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50">
-    <div class="text-center">
-      <h2 class="text-6xl font-bold text-white mb-4">¿Listo?</h2>
-      <p id="numero-cuenta" class="text-9xl font-bold text-green-500">3</p>
-    </div>
-  </div>
-
-  <h2 class="text-2xl font-bold mb-8">
-    Pregunta <span id="numero-pregunta">1</span>/10
-  </h2>
-  
-  <!-- Imagen de la pregunta -->
-  <div class="relative flex items-center justify-center mb-8">
-    <div class="flex flex-col items-center">
-      <!-- Barra de tiempo -->
-      <div class="w-[512px] h-2 bg-gray-300 rounded mb-4 overflow-hidden">
-        <div id="barra-tiempo" class="h-full bg-black transition-none" style="width: 100%;"></div>
-      </div>
-      
-      <!-- Imagen principal -->
-      <img id="imagen-pregunta"
-           src="{% static 'recycler/images/plastico1.png' %}"
-           alt="Imagen basura"
-           class="w-[512px] h-[512px] object-contain rounded-lg shadow-lg bg-white">
-    </div>
-    
-    <!-- Panel de puntaje y racha -->
-    <div class="absolute left-[calc(50%+280px)] top-6">
-      <div class="bg-white p-6 rounded-lg shadow-md min-w-[200px]">
-        <p class="text-xl font-bold mb-4">
-          Puntaje: <span id="puntaje" class="text-green-600">0</span>
-        </p>
-        <p class="text-lg font-semibold">
-          Racha: <span id="racha" class="text-orange-500">0</span>
-        </p>
-        <p id="retroalimentacion" class="text-md font-bold text-gray-700 mt-4"></p>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Opciones -->
-  <div id="opciones" class="grid grid-cols-2 gap-4 mt-4"></div>
-</div>
-<!-- Definicion de variables  -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const preguntas = {{ questions|safe }};
-  let indice = 0; // numero de pregunta
-  let puntaje = 0; // puntaje del juego
-  let racha = 0; // racha del jugador
-  let tiempo = 10; // tiempo para responder cada pregunta
-  let intervalo; // auxiliar del temporizador
-  let respondido = false; // Bool para saber si una regunta esta respondida
-  
- // se vinculan las variables con un elmento del DOM html
-
-  const barraTiempo = document.getElementById("barra-tiempo");
-  const retroalimentacion = document.getElementById("retroalimentacion");
-  const puntajeEl = document.getElementById("puntaje");
-  const rachaEl = document.getElementById("racha");
-  const pantallaCuenta = document.getElementById("pantalla-cuenta");
-  const numeroCuenta = document.getElementById("numero-cuenta");
-  
-  // Funcion cuenta regresiva que se muestra al comenzar el juego
-  function mostrarCuentaRegresiva() {
-    let cuenta = 3;
-    numeroCuenta.textContent = cuenta;
-    // Modifica la cuenta regresiva para irla bajando cada segundo
-    const intervaloCuenta = setInterval(() => {
-      cuenta--;
-      if (cuenta > 0) {
-        numeroCuenta.textContent = cuenta;
-      } else if (cuenta === 0) {
-        numeroCuenta.textContent = "¡Ya!";
-        numeroCuenta.className = "text-9xl font-bold text-yellow-400";
-      } else {
-        clearInterval(intervaloCuenta);
-        pantallaCuenta.style.display = "none";
-        cargarPregunta();
-      }
-    }, 1000);
-  }
-  // muestra la cuenta regresiva al ingresar a la pagina 
-  mostrarCuentaRegresiva();
-
-  //Saca una pregunta de la base de datos para cargarla en la pagina
-  function cargarPregunta() {
-    // si 10 preguntas fueron respondidas te redirige a los resultados
-    if (indice >= preguntas.length) {
-      window.location.href = "{% url 'results' %}?puntaje=" + puntaje;
-      return;
-    }
-    // Actualiza algunos parametros correspondientes a la pregunta
-    respondido = false;
-    const pregunta = preguntas[indice];
-    document.getElementById("numero-pregunta").textContent = indice + 1;
-    document.getElementById("imagen-pregunta").src = "/static/" + pregunta.image;
-    retroalimentacion.textContent = "";
-    // Carga las posubles opciones de la pregunta
-    const opcionesDiv = document.getElementById("opciones");
-    opcionesDiv.innerHTML = "";
-
-    // colores por boton
-    const colores = {
-      "Papel": "bg-blue-500 hover:bg-blue-600",
-      "Plástico": "bg-yellow-400 hover:bg-yellow-500",
-      "Vidrio": "bg-green-500 hover:bg-green-600",
-      "Metal": "bg-gray-300 hover:bg-gray-400 text-gray-800"
-    };
-    
-    // Carga las funciones de cada boton por separado
-    pregunta.options.forEach(opcion => {
-      const boton = document.createElement("button");
-      boton.textContent = opcion;
-      const colorClase = colores[opcion] || "bg-green-500 hover:bg-green-600";
-      const colorTexto = opcion === "Metal" ? "text-gray-800" : "text-white";
-      boton.className = `boton-opcion ${colorClase} ${colorTexto} py-4 px-8 rounded-lg font-bold text-xl transition-colors shadow-md`;
-      boton.onclick = () => verificarRespuesta(opcion);
-      opcionesDiv.appendChild(boton);
-    });
-
-    // Define la barra de tiempo y la actualiza
-    tiempo = 10;
-    actualizarBarraTiempo();
-    clearInterval(intervalo);
-    
-    // Cuenta regresiva de la barra de tiempo
-    setTimeout(() => {
-      intervalo = setInterval(() => {
-        tiempo--;
-        actualizarBarraTiempo();
-        // cuando el tiempo es 0 reinicia la racha y la cobra la pregunta como mala
-        if (tiempo <= 0) {
-          clearInterval(intervalo);
-          respondido = true;
-          racha = 0;
-          rachaEl.textContent = racha;
-          siguientePregunta();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLogic - Quiz de Reciclaje</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }, 1000);
-    }, 1000);
-  }
-  // Actualiza la barra de tiempo
-  function actualizarBarraTiempo() {
-    barraTiempo.style.width = (tiempo * 10) + "%";
-  }
-  // Verifica si la respuesta es correcta y retorna true o false dependiendo si esta bien o mal y bloquea los botones para evitar bugs
-  function verificarRespuesta(seleccionada) {
-    if (respondido) return;
-    respondido = true;
 
-    const botones = document.querySelectorAll('.boton-opcion');
-    botones.forEach(boton => {
-      boton.disabled = true;
-      boton.style.opacity = '0.6';
-      boton.style.cursor = 'not-allowed';
+        body {
+            font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-image: url("{% static 'icons/game_bg.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        /* Overlay con gradiente verde */
+        .game-overlay {
+            min-height: 100vh;
+            background: linear-gradient(to bottom, 
+                rgba(22, 66, 39, 0.88) 0%, 
+                rgba(46, 125, 50, 0.75) 20%,
+                rgba(76, 175, 80, 0.6) 50%,
+                rgba(139, 195, 74, 0.5) 80%,
+                rgba(205, 220, 57, 0.4) 100%);
+            position: relative;
+        }
+
+        /* Header con logo */
+        .header-logo {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(27, 94, 32, 0.95) 0%, rgba(46, 125, 50, 0.95) 100%);
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border-bottom: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-logo img {
+            height: 60px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Contenedor principal del juego */
+        .game-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Barra de progreso en la parte superior */
+        .progress-text {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+            margin-bottom: 15px;
+        }
+
+        /* Contenedor de imagen y panel */
+        .main-content {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        /* Caja de la imagen */
+        .image-box {
+            background: linear-gradient(135deg, rgba(129, 212, 250, 0.95) 0%, rgba(144, 202, 249, 0.95) 100%);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+        }
+
+        /* Barra de tiempo encima de la imagen */
+        .time-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .time-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1B5E20 0%, #4CAF50 50%, #8BC34A 100%);
+            transition: width 1s linear;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.8);
+        }
+
+        .question-image {
+            width: 450px;
+            height: 450px;
+            object-fit: contain;
+            border-radius: 15px;
+            filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Panel de puntaje */
+        .score-panel {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 245, 245, 0.98) 100%);
+            border-radius: 25px;
+            padding: 30px 25px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+            border: 5px solid rgba(139, 195, 74, 0.6);
+            min-width: 240px;
+        }
+
+        .score-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.4em;
+            font-weight: 800;
+            color: #1B5E20;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 2.2em;
+            font-weight: 800;
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .streak-section {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 3px solid rgba(139, 195, 74, 0.3);
+        }
+
+        .streak-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #F57F17;
+            margin-bottom: 8px;
+        }
+
+        .streak-value {
+            font-size: 2em;
+            font-weight: 800;
+            color: #FF6F00;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-text {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-align: center;
+            font-size: 1.1em;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Botones de opciones */
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .option-button {
+            padding: 25px 40px;
+            border-radius: 50px;
+            font-size: 1.5em;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            font-family: 'Baloo 2', cursive;
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .option-button:hover:not(:disabled) {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .option-button:active:not(:disabled) {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .option-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Colores de botones según tu diseño */
+        .btn-yellow {
+            background: linear-gradient(135deg, #FFF176 0%, #FFEB3B 50%, #FDD835 100%);
+            color: #F57F17;
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, #C5E1A5 0%, #AED581 50%, #9CCC65 100%);
+            color: #33691E;
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #B3E5FC 0%, #81D4FA 50%, #4FC3F7 100%);
+            color: #01579B;
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #FFAB91 0%, #FF8A65 50%, #FF7043 100%);
+            color: #BF360C;
+        }
+
+        /* Pantalla de cuenta regresiva */
+        .countdown-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .countdown-content {
+            text-align: center;
+        }
+
+        .countdown-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 4em;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+        }
+
+        .countdown-number {
+            font-family: 'Baloo 2', cursive;
+            font-size: 10em;
+            font-weight: 800;
+            color: #4CAF50;
+            text-shadow: 0 0 40px rgba(76, 175, 80, 0.9);
+            animation: pulse 1s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .countdown-go {
+            font-size: 10em;
+            color: #FFEB3B;
+            text-shadow: 0 0 40px rgba(255, 235, 59, 0.9);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .question-image {
+                width: 350px;
+                height: 350px;
+            }
+
+            .score-panel {
+                width: 100%;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .question-image {
+                width: 280px;
+                height: 280px;
+            }
+
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .option-button {
+                padding: 20px 30px;
+                font-size: 1.3em;
+            }
+
+            .countdown-number {
+                font-size: 7em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-overlay">
+        <!-- Header con logo -->
+        <div class="header-logo">
+            <img src="{% static 'icons/logo_ecologic.png' %}" alt="EcoLogic">
+        </div>
+
+        <!-- Pantalla de cuenta regresiva -->
+        <div id="countdown-screen" class="countdown-screen">
+            <div class="countdown-content">
+                <h2 class="countdown-title">¿Listo?</h2>
+                <p id="countdown-number" class="countdown-number">3</p>
+            </div>
+        </div>
+
+        <!-- Contenedor del juego -->
+        <div class="game-container">
+            <!-- Progreso -->
+            <div class="progress-text">
+                Pregunta <span id="question-number">1</span>/10
+            </div>
+
+            <!-- Contenido principal -->
+            <div class="main-content">
+                <!-- Caja de imagen -->
+                <div class="image-box">
+                    <div class="time-bar-container">
+                        <div id="time-bar" class="time-bar-fill" style="width: 100%;"></div>
+                    </div>
+                    <img id="question-image" 
+                         src="{% static 'recycler/images/plastico1.png' %}" 
+                         alt="Material a clasificar" 
+                         class="question-image">
+                </div>
+
+                <!-- Panel de puntaje -->
+                <div class="score-panel">
+                    <div class="score-title">Puntaje</div>
+                    <div class="score-value" id="score">0000</div>
+                    
+                    <div class="streak-section">
+                        <div class="streak-title">Racha</div>
+                        <div class="streak-value" id="streak">0</div>
+                    </div>
+
+                    <div id="feedback" class="feedback-text"></div>
+                </div>
+            </div>
+
+            <!-- Botones de opciones -->
+            <div id="options" class="options-container"></div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const questions = {{ questions|safe }};
+        let currentIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let timeLeft = 10;
+        let timerInterval;
+        let answered = false;
+
+        // Elementos del DOM
+        const timeBar = document.getElementById("time-bar");
+        const feedback = document.getElementById("feedback");
+        const scoreEl = document.getElementById("score");
+        const streakEl = document.getElementById("streak");
+        const countdownScreen = document.getElementById("countdown-screen");
+        const countdownNumber = document.getElementById("countdown-number");
+
+        // Mapeo de colores para los botones
+        const buttonColors = {
+            "Papel": "btn-blue",
+            "Plástico y Latas": "btn-yellow",
+            "Vidrio": "btn-green",
+            "Electronicos": "btn-red"
+        };
+
+        // Función de cuenta regresiva inicial
+        function showCountdown() {
+            let count = 3;
+            countdownNumber.textContent = count;
+            countdownNumber.className = "countdown-number";
+
+            const countdownInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNumber.textContent = count;
+                    countdownNumber.className = "countdown-number";
+                } else if (count === 0) {
+                    countdownNumber.textContent = "¡Ya!";
+                    countdownNumber.className = "countdown-go";
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownScreen.style.display = "none";
+                    loadQuestion();
+                }
+            }, 1000);
+        }
+
+        // Mostrar cuenta regresiva al inicio
+        showCountdown();
+
+        // Cargar pregunta
+        function loadQuestion() {
+            if (currentIndex >= questions.length) {
+                window.location.href = "{% url 'results' %}?puntaje=" + score;
+                return;
+            }
+
+            answered = false;
+            const question = questions[currentIndex];
+            
+            document.getElementById("question-number").textContent = currentIndex + 1;
+            document.getElementById("question-image").src = "/static/" + question.image;
+            feedback.textContent = "";
+            feedback.style.background = "";
+
+            // Cargar opciones
+            const optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+
+            question.options.forEach(option => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.className = `option-button ${buttonColors[option] || "btn-green"}`;
+                button.onclick = () => checkAnswer(option);
+                optionsDiv.appendChild(button);
+            });
+
+            // Iniciar temporizador
+            timeLeft = 10;
+            updateTimeBar();
+            clearInterval(timerInterval);
+
+            setTimeout(() => {
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimeBar();
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        if (!answered) {
+                            answered = true;
+                            streak = 0;
+                            streakEl.textContent = streak;
+                            feedback.textContent = "¡Tiempo agotado!";
+                            feedback.style.background = "linear-gradient(135deg, #FFCDD2, #EF9A9A)";
+                            feedback.style.color = "#B71C1C";
+                            setTimeout(nextQuestion, 1500);
+                        }
+                    }
+                }, 1000);
+            }, 1000);
+        }
+
+        // Actualizar barra de tiempo
+        function updateTimeBar() {
+            timeBar.style.width = (timeLeft * 10) + "%";
+        }
+
+        // Verificar respuesta
+        function checkAnswer(selected) {
+            if (answered) return;
+            answered = true;
+
+            const buttons = document.querySelectorAll('.option-button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+            });
+
+            const correct = questions[currentIndex].correct;
+            
+            if (selected === correct) {
+                score += timeLeft * 100 + streak * 50;
+                streak++;
+                feedback.textContent = "¡Correcto! 🎉";
+                feedback.style.background = "linear-gradient(135deg, #C8E6C9, #A5D6A7)";
+                feedback.style.color = "#1B5E20";
+            } else {
+                streak = 0;
+                feedback.textContent = `Incorrecto ❌\nCorrecta: ${correct}`;
+                feedback.style.background = "linear-gradient(135deg, #FFCDD2, #EF9A9A)";
+                feedback.style.color = "#B71C1C";
+            }
+
+            scoreEl.textContent = score.toString().padStart(4, '0');
+            streakEl.textContent = streak;
+            clearInterval(timerInterval);
+            setTimeout(nextQuestion, 2000);
+        }
+
+        // Siguiente pregunta
+        function nextQuestion() {
+            currentIndex++;
+            loadQuestion();
+        }
     });
-// sistema de recompensa de puntaje y racha, Putaje = Tiempo * 100, y la racha aumenta en 1 cada vez que es respondido correctamente, en caso de no ser asi, se otorgan 0 puntos y se reinicia la racha
-    const correcta = preguntas[indice].correct;
-    if (seleccionada === correcta) {
-      puntaje += tiempo * 100 + racha * 50;
-      racha++;
-      retroalimentacion.textContent = "¡Correcto!";
-      retroalimentacion.className = "text-green-600 font-bold text-lg mt-4";
-    } else {
-      racha = 0;
-      retroalimentacion.textContent = "Incorrecto, La respuesta correcta era: " + correcta;
-      retroalimentacion.className = "text-red-600 font-bold text-lg mt-4";
-    }
-// Actualiza el puntaje y lo muestra en pantalla
-    puntajeEl.textContent = puntaje;
-    rachaEl.textContent = racha;
-    clearInterval(intervalo);
-    setTimeout(siguientePregunta, 1500);
-  }
-// Carga la siguiente pregunta
-  function siguientePregunta() {
-    indice++;
-    cargarPregunta();
-  }
-});
-</script>
-{% endblock %}
+    </script>
+</body>
+</html>

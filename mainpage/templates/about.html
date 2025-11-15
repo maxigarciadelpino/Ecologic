@@ -1,17 +1,418 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Sobre nosotros</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
-        <h1>Sobre nosotros</h1>
-        <p>Somos un equipo de estudiantes de Ingeniería Civil Informática de la Universidad Técnica Federico Santa María (UTFSM), comprometidos con el desarrollo de soluciones tecnológicas que generen un impacto positivo en la sociedad. Este proyecto surge como una iniciativa académica orientada a promover la educación ambiental mediante herramientas digitales interactivas y accesibles para todo público, especialmente para niños y jóvenes.</p>
-        <h1>Vision</h1>    
-        <p>Nuestra motivación principal es contribuir a la formación de hábitos responsables relacionados con el reciclaje, mostrando no solo su relevancia para el cuidado del medio ambiente, sino también lo sencillo que puede ser incorporarlo en la vida cotidiana. Creemos firmemente que experiencias educativas tempranas, reforzadas a través de plataformas lúdicas, pueden despertar el interés y la curiosidad de las nuevas generaciones, incentivándolas a profundizar en temas medioambientales y a convertirse en agentes de cambio dentro de sus comunidades.</p>
-        <h1>Mision</h1>
-        <p>Con este proyecto buscamos no solo informar, sino también inspirar, fomentando una cultura de responsabilidad ecológica mediante el uso de tecnologías que acompañen los procesos de aprendizaje de forma dinámica, didáctica y significativa.</p>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre Nosotros - EcoLogic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+            background-image: url('{% static "icons/main.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Overlay para mejorar legibilidad */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header fijo */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(76, 175, 80, 0.95);
+            padding: 20px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-bottom: 5px solid #2E7D32;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .logo-header:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-header img {
+            width: 80px;
+            height: auto;
+            filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.3));
+            animation: logoBounce 3s infinite ease-in-out;
+        }
+
+        @keyframes logoBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .logo-header h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 130px auto 50px;
+            padding: 0 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Secciones con tarjetas */
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 5px solid;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Decoraciones de esquina */
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .section-card::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: -20px;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Colores para cada sección */
+        .card-purple {
+            border-color: #9C27B0;
+            background: linear-gradient(135deg, rgba(243, 229, 245, 0.95) 0%, rgba(225, 190, 231, 0.95) 100%);
+        }
+
+        .card-green {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95) 0%, rgba(200, 230, 201, 0.95) 100%);
+        }
+
+        .card-blue {
+            border-color: #2196F3;
+            background: linear-gradient(135deg, rgba(227, 242, 253, 0.95) 0%, rgba(187, 222, 251, 0.95) 100%);
+        }
+
+        .card-orange {
+            border-color: #FF9800;
+            background: linear-gradient(135deg, rgba(255, 243, 224, 0.95) 0%, rgba(255, 224, 178, 0.95) 100%);
+        }
+
+        /* Títulos de sección */
+        .section-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-purple .section-title {
+            color: #7B1FA2;
+            text-shadow: 2px 2px 4px rgba(123, 31, 162, 0.2);
+        }
+
+        .card-green .section-title {
+            color: #2E7D32;
+            text-shadow: 2px 2px 4px rgba(46, 125, 50, 0.2);
+        }
+
+        .card-blue .section-title {
+            color: #1565C0;
+            text-shadow: 2px 2px 4px rgba(21, 101, 192, 0.2);
+        }
+
+        .card-orange .section-title {
+            color: #E65100;
+            text-shadow: 2px 2px 4px rgba(230, 81, 0, 0.2);
+        }
+
+        .title-icon {
+            font-size: 1.3em;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Texto */
+        .section-text {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #333;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Emojis decorativos flotantes */
+        .floating-emoji {
+            position: absolute;
+            font-size: 3em;
+            animation: float 4s infinite ease-in-out;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .emoji1 { top: 10%; right: 5%; animation-delay: 0s; }
+        .emoji2 { bottom: 15%; left: 5%; animation-delay: 1s; }
+        .emoji3 { top: 50%; right: 3%; animation-delay: 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        /* Estrellitas brillantes */
+        .sparkle-decoration {
+            position: fixed;
+            font-size: 1.5em;
+            animation: sparkle 3s infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sparkle1 { top: 150px; left: 10%; animation-delay: 0s; }
+        .sparkle2 { top: 300px; right: 15%; animation-delay: 1s; }
+        .sparkle3 { top: 500px; left: 20%; animation-delay: 2s; }
+        .sparkle4 { top: 700px; right: 10%; animation-delay: 1.5s; }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+
+        /* Nubes flotantes en el fondo */
+        .cloud-float {
+            position: fixed;
+            font-size: 4em;
+            animation: cloudMove 40s infinite linear;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .cloud1 { top: 10%; left: -100px; animation-delay: 0s; }
+        .cloud2 { top: 30%; left: -150px; animation-delay: 15s; }
+
+        @keyframes cloudMove {
+            0% { left: -100px; }
+            100% { left: 110%; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 15px;
+            }
+
+            .logo-header img {
+                width: 60px;
+            }
+
+            .logo-header h1 {
+                font-size: 1.8em;
+            }
+
+            .container {
+                margin-top: 120px;
+                padding: 0 15px;
+            }
+
+            .section-card {
+                padding: 25px;
+                margin-bottom: 25px;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .section-text {
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-header img {
+                width: 50px;
+            }
+
+            .logo-header h1 {
+                font-size: 1.5em;
+            }
+
+            .section-title {
+                font-size: 1.7em;
+            }
+
+            .section-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Estrellitas decorativas -->
+    <div class="sparkle-decoration sparkle1">✨</div>
+    <div class="sparkle-decoration sparkle2">⭐</div>
+    <div class="sparkle-decoration sparkle3">✨</div>
+    <div class="sparkle-decoration sparkle4">⭐</div>
+
+    <!-- Nubes flotantes -->
+    <div class="cloud-float cloud1">☁️</div>
+    <div class="cloud-float cloud2">☁️</div>
+
+    <!-- Header fijo -->
+    <div class="header">
+        <a href="{% url 'home' %}" class="logo-header">
+            <img src="{% static 'icons/logo_ecologic.png' %}" alt="EcoLogic">
+            <h1>EcoLogic</h1>
+        </a>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <!-- Sección: ¿Quiénes somos? -->
+        <div class="section-card card-purple">
+            <div class="floating-emoji emoji1">👥</div>
+            <div class="floating-emoji emoji2">🎓</div>
+            
+            <h2 class="section-title">
+                <span class="title-icon">🌟</span>
+                ¿Quiénes Somos?
+            </h2>
+            <p class="section-text">
+                Somos un equipo de estudiantes de <strong>Ingeniería Civil Informática</strong> de la 
+                <strong>Universidad Técnica Federico Santa María (UTFSM)</strong>, comprometidos con el 
+                desarrollo de soluciones tecnológicas que generen un impacto positivo en la sociedad. 
+                Este proyecto surge como una iniciativa académica orientada a promover la educación 
+                ambiental mediante herramientas digitales interactivas y accesibles para todo público, 
+                especialmente para niños y jóvenes.
+            </p>
+        </div>
+
+        <!-- Sección: Visión -->
+        <div class="section-card card-green">
+            <div class="floating-emoji emoji1">🌍</div>
+            <div class="floating-emoji emoji3">♻️</div>
+            
+            <h2 class="section-title">
+                <span class="title-icon">👁️</span>
+                Nuestra Visión
+            </h2>
+            <p class="section-text">
+                Nuestra motivación principal es contribuir a la formación de <strong>hábitos responsables</strong> 
+                relacionados con el reciclaje, mostrando no solo su relevancia para el cuidado del medio ambiente, 
+                sino también lo sencillo que puede ser incorporarlo en la vida cotidiana. Creemos firmemente que 
+                experiencias educativas tempranas, reforzadas a través de plataformas lúdicas, pueden despertar 
+                el interés y la curiosidad de las nuevas generaciones, incentivándolas a profundizar en temas 
+                medioambientales y a convertirse en <strong>agentes de cambio</strong> dentro de sus comunidades.
+            </p>
+        </div>
+
+        <!-- Sección: Misión -->
+        <div class="section-card card-blue">
+            <div class="floating-emoji emoji2">🎯</div>
+            <div class="floating-emoji emoji3">💡</div>
+            
+            <h2 class="section-title">
+                <span class="title-icon">🚀</span>
+                Nuestra Misión
+            </h2>
+            <p class="section-text">
+                Con este proyecto buscamos no solo <strong>informar</strong>, sino también <strong>inspirar</strong>, 
+                fomentando una cultura de responsabilidad ecológica mediante el uso de tecnologías que acompañen 
+                los procesos de aprendizaje de forma dinámica, didáctica y significativa.
+            </p>
+        </div>
+
+        <!-- Sección extra: ¿Por qué es importante? -->
+        <div class="section-card card-orange">
+            <div class="floating-emoji emoji1">🌱</div>
+            <div class="floating-emoji emoji2">💚</div>
+            
+            <h2 class="section-title">
+                <span class="title-icon">❤️</span>
+                ¿Por Qué es Importante?
+            </h2>
+            <p class="section-text">
+                El reciclaje es una de las formas más efectivas de cuidar nuestro planeta. Cada pequeña acción cuenta: 
+                desde separar la basura en casa hasta aprender qué materiales se pueden reciclar. 
+                <strong>¡Juntos podemos hacer la diferencia!</strong> 🌎✨
+            </p>
+        </div>
+    </div>
+</body>
 </html>

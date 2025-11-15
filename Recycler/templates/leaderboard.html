@@ -1,33 +1,501 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Rankings</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
-        <a href="{% url 'recycler'%}">Volver</a>
-        <h1>Rankings</h1>
-            <table border="1">
-                <tr>
-                    <th>Posición</th>
-                    <th>Usuario</th>
-                    <th>Días consecutivos</th>
-                    <th>Puntaje promedio</th>
-                    <th>Partidas jugadas</th>
-                </tr>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Campeones - EcoLogic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-                {% for j in jugadores %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ j.user.username }}</td>
-                    <td>{{ j.consecutive_days }}</td>
-                    <td>{{ j.avg_score }}</td>
-                    <td>{{ j.games_played }}</td>
-                </tr>
-                {% endfor %}
+        body {
+            font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+            background-image: url('/static/icons/game_bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.15);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Header fijo */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(76, 175, 80, 0.95);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-bottom: 5px solid #2E7D32;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .logo-header:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-header img {
+            width: 60px;
+            height: auto;
+            filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.3));
+        }
+
+        .logo-header h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.8em;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #42A5F5 0%, #1976D2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(25, 118, 210, 0.4);
+            transition: all 0.3s;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(25, 118, 210, 0.6);
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1200px;
+            margin: 120px auto 50px;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Título principal */
+        .main-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .main-title h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 3.5em;
+            color: #ffffffff;
+            text-shadow: 
+                4px 4px 0 #FF6B9D,
+                8px 8px 0 #4CAF50,
+                12px 12px 20px rgba(0,0,0,0.3);
+            animation: wiggle 2s infinite ease-in-out;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        /* Contenedor de la tabla */
+        .leaderboard-card {
+            background: linear-gradient(135deg, rgba(200, 230, 201, 0.95) 0%, rgba(165, 214, 167, 0.95) 100%);
+            border-radius: 40px;
+            padding: 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 6px solid #4CAF50;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
+
+        thead tr {
+            background: linear-gradient(135deg, #C8E86C 0%, #9CCC65 100%);
+        }
+
+        th {
+            padding: 18px 15px;
+            text-align: center;
+            color: #1B5E20;
+            font-weight: 800;
+            font-size: 1.2em;
+            font-family: 'Baloo 2', cursive;
+        }
+
+        thead tr th:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        thead tr th:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        tbody tr {
+            background: linear-gradient(135deg, rgba(179, 229, 252, 0.95) 0%, rgba(129, 212, 250, 0.95) 100%);
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        tbody tr:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Filas especiales para top 3 */
+        tbody tr:nth-child(1) {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 193, 7, 0.95) 100%);
+        }
+
+        tbody tr:nth-child(2) {
+            background: linear-gradient(135deg, rgba(224, 224, 224, 0.95) 0%, rgba(189, 189, 189, 0.95) 100%);
+        }
+
+        tbody tr:nth-child(3) {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.95) 0%, rgba(184, 115, 51, 0.95) 100%);
+        }
+
+        td {
+            padding: 18px 15px;
+            text-align: center;
+            color: #01579B;
+            font-weight: 700;
+            font-size: 1.15em;
+        }
+
+        tbody tr:nth-child(1) td,
+        tbody tr:nth-child(2) td,
+        tbody tr:nth-child(3) td {
+            color: #333;
+        }
+
+        tbody tr td:first-child {
+            border-radius: 20px 0 0 20px;
+        }
+
+        tbody tr td:last-child {
+            border-radius: 0 20px 20px 0;
+        }
+
+        /* Avatar */
+        .user-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .profile-thumbnail {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Medallas */
+        .position {
+            font-size: 1.5em;
+            font-weight: 800;
+            font-family: 'Baloo 2', cursive;
+        }
+
+        .medal {
+            font-size: 2.2em;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Trofeo central */
+        .trophy-container {
+            text-align: center;
+            margin-top: 40px;
+            animation: floatTrophy 3s infinite ease-in-out;
+        }
+
+        .trophy-img {
+            width: 100px;
+            height: auto;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
+        }
+
+        @keyframes floatTrophy {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* Emojis decorativos */
+        .emoji-decoration {
+            position: fixed;
+            font-size: 2.5em;
+            animation: fall 12s infinite linear;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .emoji1 { left: 5%; top: -50px; animation-delay: 0s; }
+        .emoji2 { left: 15%; top: -50px; animation-delay: 3s; }
+        .emoji3 { left: 25%; top: -50px; animation-delay: 6s; }
+        .emoji4 { right: 5%; top: -50px; animation-delay: 2s; }
+        .emoji5 { right: 15%; top: -50px; animation-delay: 5s; }
+        .emoji6 { right: 25%; top: -50px; animation-delay: 8s; }
+
+        @keyframes fall {
+            0% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Sparkles */
+        .sparkle {
+            position: fixed;
+            font-size: 1.8em;
+            animation: sparkle 3s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .sparkle1 { top: 20%; left: 10%; animation-delay: 0s; }
+        .sparkle2 { top: 40%; right: 15%; animation-delay: 1s; }
+        .sparkle3 { top: 70%; left: 20%; animation-delay: 2s; }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.3) rotate(180deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+
+            .main-title h1 {
+                font-size: 2.8em;
+            }
+
+            .leaderboard-card {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+
+            .logo-header img {
+                width: 50px;
+            }
+
+            .logo-header h1 {
+                font-size: 1.4em;
+            }
+
+            .back-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .container {
+                margin-top: 90px;
+                padding: 15px;
+            }
+
+            .main-title h1 {
+                font-size: 2em;
+                text-shadow: 
+                    3px 3px 0 #FF6B9D,
+                    6px 6px 0 #4CAF50,
+                    9px 9px 15px rgba(0,0,0,0.3);
+            }
+
+            .leaderboard-card {
+                padding: 20px;
+                border-radius: 30px;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 1em;
+            }
+
+            .profile-thumbnail {
+                width: 45px;
+                height: 45px;
+            }
+
+            .medal {
+                font-size: 1.8em;
+            }
+
+            .trophy-img {
+                width: 70px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title h1 {
+                font-size: 1.6em;
+            }
+
+            th, td {
+                padding: 10px 5px;
+                font-size: 0.9em;
+            }
+
+            .user-cell {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .profile-thumbnail {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Emojis decorativos cayendo -->
+    <div class="emoji-decoration emoji1">🍂</div>
+    <div class="emoji-decoration emoji2">🍁</div>
+    <div class="emoji-decoration emoji3">♻️</div>
+    <div class="emoji-decoration emoji4">🌿</div>
+    <div class="emoji-decoration emoji5">🌱</div>
+    <div class="emoji-decoration emoji6">🍃</div>
+
+    <!-- Sparkles -->
+    <div class="sparkle sparkle1">✨</div>
+    <div class="sparkle sparkle2">⭐</div>
+    <div class="sparkle sparkle3">✨</div>
+
+    <!-- Header fijo -->
+    <div class="header">
+        <a href="{% url 'home' %}" class="logo-header">
+            <img src="/static/icons/logo_ecologic.png" alt="EcoLogic">
+            <h1>EcoLogic</h1>
+        </a>
+        <a href="{% url 'recycler' %}" class="back-btn">
+            <span>🔙</span>
+            <span>Volver</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Título principal -->
+        <div class="main-title">
+            <h1>🏆 Campeones del reciclaje 🏆</h1>
+        </div>
+
+        <!-- Tarjeta de la tabla -->
+        <div class="leaderboard-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>🏅 Posición</th>
+                        <th>👤 Usuario</th>
+                        <th>📅 Días</th>
+                        <th>⭐ Promedio</th>
+                        <th>🎮 Partidas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for j in jugadores %}
+                    <tr>
+                        <td class="position">
+                            {% if forloop.counter == 1 %}
+                                <span class="medal">🥇</span>
+                            {% elif forloop.counter == 2 %}
+                                <span class="medal">🥈</span>
+                            {% elif forloop.counter == 3 %}
+                                <span class="medal">🥉</span>
+                            {% else %}
+                                {{ forloop.counter }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="user-cell">
+                                {% if j.user.profile.thumbnail %}
+                                    <img src="{{ j.user.profile.thumbnail.url }}" alt="{{ j.user.username }}" class="profile-thumbnail">
+                                {% else %}
+                                    <img src="/static/icons/default_user.jpeg" alt="{{ j.user.username }}" class="profile-thumbnail">
+                                {% endif %}
+                                <span>{{ j.user.username }}</span>
+                            </div>
+                        </td>
+                        <td>{{ j.consecutive_days }}</td>
+                        <td>{{ j.avg_score }}</td>
+                        <td>{{ j.games_played }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 50px; text-align: center; font-size: 1.2em;">
+                            No hay jugadores en el ranking aún. ¡Sé el primero en jugar! 🎯
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-        </h1>
-    </body>
+
+            <!-- Trofeo -->
+            <div class="trophy-container">
+                <img src="/static/icons/trophy.png" alt="Trofeo" class="trophy-img">
+            </div>
+        </div>
+    </div>
+</body>
 </html>

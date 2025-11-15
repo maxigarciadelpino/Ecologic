@@ -1,32 +1,485 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <title>Recycler</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <h1><a href="{% url 'home' %}">EcoLogic</a></h1>
-        <header>
-            <h1>Quiz de reciclaje</h1>
-            <a href= {% url 'leaderboard' %}>Rankings</a>
-        </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycler - Quiz de Reciclaje | EcoLogic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        <main>
-            <a href="{% url 'start_quiz'%}">Iniciar Quiz</a>
+        body {
+            font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+            background-image: url('{% static "icons/game_bg.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-            <section>
-                <div>
-                    <h2>Como Jugar</h2>
-                    <p>Recycler es un juego estilo Kahoot! de opción múltiple, donde tu misión es elegir el contenedor correcto para cada tipo de basura. En cada pregunta verás una imagen al centro de la pantalla, y tendrás que tocar el botón del contenedor al que pertenece. Cada contenedor tiene un color y un nombre, igual que en la vida real, para que puedas aprender a reconocerlos y reciclar correctamente. ¡Mientras más aciertes, más puntos ganas!</p>
-                </div>
+        /* Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.15);
+            z-index: 0;
+            pointer-events: none;
+        }
 
-                <div>
-                    <h2>Aprende mas sobre reciclaje</h2>
-                    <p>Reciclar es una forma sencilla de ayudar al planeta. Cuando separamos los materiales como el vidrio, el plástico, el papel y el metal, estos pueden convertirse en nuevos productos en lugar de terminar en la basura. Así usamos menos recursos naturales, reducimos la contaminación y cuidamos el medio ambiente. ¡Cada pequeño gesto cuenta, y tú puedes ser parte del cambio!</p>
-                </div>
-            </section>
-        </main>
+        /* Header fijo */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(76, 175, 80, 0.95);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-bottom: 5px solid #2E7D32;
+            backdrop-filter: blur(10px);
+        }
 
-    </body>
+        .logo-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .logo-header:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-header img {
+            width: 60px;
+            height: auto;
+            filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.3));
+        }
+
+        .logo-header h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.8em;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .leaderboard-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(255, 165, 0, 0.4);
+            transition: all 0.3s;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .leaderboard-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 165, 0, 0.6);
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Título principal */
+        .main-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .main-title h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 4em;
+            color: #ffffffff;
+            text-shadow: 
+                4px 4px 0 #4CAF50,
+                8px 8px 0 #2196F3,
+                12px 12px 20px rgba(0,0,0,0.3);
+            animation: wiggle 2s infinite ease-in-out;
+            margin-bottom: 20px;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        /* Botón de jugar grande */
+        .play-button-container {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .play-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF1744 100%);
+            color: white;
+            padding: 30px 70px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 2.5em;
+            font-weight: 800;
+            box-shadow: 0 10px 30px rgba(255, 23, 68, 0.5);
+            transition: all 0.3s;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            animation: pulse 2s infinite;
+            font-family: 'Baloo 2', cursive;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(255, 23, 68, 0.7);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Contenedores de reciclaje */
+        .bins-showcase {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .bin-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            border: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bin-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .bin-card:hover::before {
+            opacity: 1;
+        }
+
+        .bin-card:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+
+        .bin-yellow {
+            border-color: #FFC107;
+            background: linear-gradient(135deg, rgba(255, 249, 196, 0.95) 0%, rgba(255, 241, 118, 0.95) 100%);
+        }
+
+        .bin-green {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95) 0%, rgba(200, 230, 201, 0.95) 100%);
+        }
+
+        .bin-blue {
+            border-color: #2196F3;
+            background: linear-gradient(135deg, rgba(227, 242, 253, 0.95) 0%, rgba(187, 222, 251, 0.95) 100%);
+        }
+
+        .bin-red {
+            border-color: #F44336;
+            background: linear-gradient(135deg, rgba(255, 235, 238, 0.95) 0%, rgba(255, 205, 210, 0.95) 100%);
+        }
+
+        .bin-image {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            margin: 0 auto 15px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .bin-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.8em;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .bin-yellow .bin-title { color: #F57F17; }
+        .bin-green .bin-title { color: #1B5E20; }
+        .bin-blue .bin-title { color: #0D47A1; }
+        .bin-red .bin-title { color: #B71C1C; }
+
+        .bin-description {
+            font-size: 1.1em;
+            color: #666;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        /* Secciones de información */
+        .info-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 5px solid;
+        }
+
+        .info-card-game {
+            border-color: #9C27B0;
+            background: linear-gradient(135deg, rgba(243, 229, 245, 0.95) 0%, rgba(225, 190, 231, 0.95) 100%);
+        }
+
+        .info-card-learn {
+            border-color: #FF9800;
+            background: linear-gradient(135deg, rgba(255, 243, 224, 0.95) 0%, rgba(255, 224, 178, 0.95) 100%);
+        }
+
+        .info-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.2em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-card-game .info-title {
+            color: #6A1B9A;
+        }
+
+        .info-card-learn .info-title {
+            color: #E65100;
+        }
+
+        .info-text {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        /* Sparkles decorativos */
+        .sparkle {
+            position: fixed;
+            font-size: 2em;
+            animation: sparkle 3s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .sparkle1 { top: 15%; left: 10%; animation-delay: 0s; }
+        .sparkle2 { top: 25%; right: 15%; animation-delay: 1s; }
+        .sparkle3 { top: 60%; left: 20%; animation-delay: 2s; }
+        .sparkle4 { top: 70%; right: 25%; animation-delay: 1.5s; }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .bins-showcase {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+
+            .logo-header img {
+                width: 50px;
+            }
+
+            .logo-header h1 {
+                font-size: 1.4em;
+            }
+
+            .leaderboard-btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+
+            .container {
+                margin-top: 80px;
+                padding: 15px;
+            }
+
+            .main-title h1 {
+                font-size: 2.5em;
+                text-shadow: 
+                    3px 3px 0 #4CAF50,
+                    6px 6px 0 #2196F3,
+                    9px 9px 15px rgba(0,0,0,0.3);
+            }
+
+            .play-button {
+                font-size: 1.8em;
+                padding: 20px 50px;
+            }
+
+            .bins-showcase {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .bin-image {
+                width: 120px;
+                height: 120px;
+            }
+
+            .bin-title {
+                font-size: 1.5em;
+            }
+
+            .info-title {
+                font-size: 1.8em;
+            }
+
+            .info-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sparkles decorativos -->
+    <div class="sparkle sparkle1">✨</div>
+    <div class="sparkle sparkle2">⭐</div>
+    <div class="sparkle sparkle3">✨</div>
+    <div class="sparkle sparkle4">⭐</div>
+
+    <!-- Header fijo -->
+    <div class="header">
+        <a href="{% url 'home' %}" class="logo-header">
+            <img src="/static/icons/logo_ecologic.png" alt="EcoLogic">
+            <h1>EcoLogic</h1>
+        </a>
+        <a href="{% url 'leaderboard' %}" class="leaderboard-btn">
+            <span>🏆</span>
+            <span>Rankings</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Título principal -->
+        <div class="main-title">
+            <h1>♻️ QUIZ DE RECICLAJE ♻️</h1>
+        </div>
+
+        <!-- Botón de jugar -->
+        <div class="play-button-container">
+            <a href="{% url 'start_quiz' %}" class="play-button">
+                ¡JUGAR AHORA!
+            </a>
+        </div>
+
+        <!-- Contenedores de reciclaje -->
+        <div class="bins-showcase">
+            <div class="bin-card bin-yellow">
+                <img src="/static/icons/contenedor_amarillo.png" alt="Contenedor Amarillo" class="bin-image">
+                <div class="bin-title">AMARILLO</div>
+                <div class="bin-description">Plásticos y Latas</div>
+            </div>
+
+            <div class="bin-card bin-green">
+                <img src="/static/icons/contenedor_verde.png" alt="Contenedor Verde" class="bin-image">
+                <div class="bin-title">VERDE</div>
+                <div class="bin-description">Vidrios</div>
+            </div>
+
+            <div class="bin-card bin-blue">
+                <img src="/static/icons/contenedor_azul.png" alt="Contenedor Azul" class="bin-image">
+                <div class="bin-title">AZUL</div>
+                <div class="bin-description">Papel y Cartón</div>
+            </div>
+
+            <div class="bin-card bin-red">
+                <img src="/static/icons/contenedor_rojo.png" alt="Contenedor Rojo" class="bin-image">
+                <div class="bin-title">ROJO</div>
+                <div class="bin-description">Electrónicos</div>
+            </div>
+        </div>
+
+        <!-- Secciones de información -->
+        <div class="info-sections">
+            <!-- Cómo jugar -->
+            <div class="info-card info-card-game">
+                <h2 class="info-title">
+                    <span>🎯</span>
+                    <span>Cómo Jugar</span>
+                </h2>
+                <p class="info-text">
+                    Recycler es un juego estilo Kahoot! de opción múltiple, donde tu misión es elegir el contenedor correcto para cada tipo de basura. En cada pregunta verás una imagen al centro de la pantalla, y tendrás que tocar el botón del contenedor al que pertenece. Cada contenedor tiene un color y un nombre, igual que en la vida real, para que puedas aprender a reconocerlos y reciclar correctamente. <strong>¡Mientras más aciertes, más puntos ganas!</strong>
+                </p>
+            </div>
+
+            <!-- Aprende más -->
+            <div class="info-card info-card-learn">
+                <h2 class="info-title">
+                    <span>🌍</span>
+                    <span>Aprende Más</span>
+                </h2>
+                <p class="info-text">
+                    Reciclar es una forma sencilla de ayudar al planeta. Cuando separamos los materiales como el vidrio, el plástico, el papel y el metal, estos pueden convertirse en nuevos productos en lugar de terminar en la basura. Así usamos menos recursos naturales, reducimos la contaminación y cuidamos el medio ambiente. <strong>¡Cada pequeño gesto cuenta, y tú puedes ser parte del cambio!</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
 </html>
