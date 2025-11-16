@@ -1,10 +1,83 @@
-{% load static %}
+/* Contenedores showcase */
+        .bins-showcase {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+
+        .bin-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            border: 5px solid;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .bin-card:nth-child(1) { animation-delay: 0.4s; }
+        .bin-card:nth-child(2) { animation-delay: 0.5s; }
+        .bin-card:nth-child(3) { animation-delay: 0.6s; }
+        .bin-card:nth-child(4) { animation-delay: 0.7s; }
+
+        .bin-card:hover {
+            transform: translateY(-10px) rotate(2deg);
+        }
+
+        .bin-yellow {
+            border-color: #FFC107;
+            background: linear-gradient(135deg, rgba(255, 249, 196, 0.95) 0%, rgba(255, 241, 118, 0.95) 100%);
+        }
+
+        .bin-green {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95) 0%, rgba(200, 230, 201, 0.95) 100%);
+        }
+
+        .bin-blue {
+            border-color: #2196F3;
+            background: linear-gradient(135deg, rgba(227, 242, 253, 0.95) 0%, rgba(187, 222, 251, 0.95) 100%);
+        }
+
+        .bin-red {
+            border-color: #F44336;
+            background: linear-gradient(135deg, rgba(255, 235, 238, 0.95) 0%, rgba(255, 205, 210, 0.95) 100%);
+        }
+
+        .bin-image {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin: 0 auto 15px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        }
+
+        .bin-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6em;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .bin-yellow .bin-title { color: #F57F17; }
+        .bin-green .bin-title { color: #1B5E20; }
+        .bin-blue .bin-title { color: #0D47A1; }
+        .bin-red .bin-title { color: #B71C1C; }
+
+        .bin-description {
+            font-size: 1em;
+            color: #666;
+            font-weight: 600;
+        }{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoLogic - ¡Aprende Jugando!</title>
+    <title>EcoLogic - ¡Aprende a Reciclar Jugando!</title>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -15,7 +88,7 @@
 
         body {
             font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
-            background-image: url('{% static "icons/main_nino.jpg" %}');
+            background-image: url('{% static "icons/main.jpg" %}');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -24,7 +97,7 @@
             overflow-x: hidden;
         }
 
-        /* Overlay suave */
+        /* Overlay con gradiente */
         body::before {
             content: '';
             position: fixed;
@@ -32,15 +105,379 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(to bottom, 
+                rgba(76, 175, 80, 0.7) 0%,
+                rgba(139, 195, 74, 0.6) 30%,
+                rgba(205, 220, 57, 0.5) 60%,
+                rgba(255, 255, 255, 0.4) 100%);
             z-index: 0;
             pointer-events: none;
         }
 
-        /* Estrellas brillantes */
-        .sparkle {
-            position: absolute;
+        /* Header fijo */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(76, 175, 80, 0.95);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            border-bottom: 5px solid #2E7D32;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+
+        .logo-header:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-header img {
+            width: 70px;
+            height: auto;
+            filter: drop-shadow(3px 3px 8px rgba(0,0,0,0.3));
+        }
+
+        .logo-header h1 {
+            font-family: 'Baloo 2', cursive;
             font-size: 2em;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+
+
+        /* Contenedor principal */
+        .main-container {
+            max-width: 1400px;
+            margin: 100px auto 50px;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sección Hero */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 5em;
+            color: white;
+            text-shadow: 
+                4px 4px 0 #2E7D32,
+                8px 8px 0 #FF9800,
+                12px 12px 20px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            animation: wiggle 3s infinite ease-in-out;
+            line-height: 1.2;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.8em;
+            color: white;
+            font-weight: 700;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.2em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF1744 100%);
+            color: white;
+            padding: 25px 60px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(255, 23, 68, 0.5);
+            transition: all 0.3s;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .cta-button:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 23, 68, 0.7);
+        }
+
+        /* Grid de tarjetas */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(232, 245, 233, 0.95) 100%);
+            border-radius: 30px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 6px solid;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.2s; }
+        .feature-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.03);
+        }
+
+        .card-profile {
+            border-color: #FF6B9D;
+        }
+
+        .card-quiz {
+            border-color: #4CAF50;
+        }
+
+        .card-map {
+            border-color: #FF9800;
+        }
+
+        .card-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .card-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2.2em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #1B5E20;
+        }
+
+        .card-profile .card-title { color: #C2185B; }
+        .card-quiz .card-title { color: #1B5E20; }
+        .card-map .card-title { color: #E65100; }
+
+        .card-description {
+            font-size: 1.2em;
+            color: #2E7D32;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .card-button {
+            display: inline-block;
+            padding: 15px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: 800;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            font-family: 'Baloo 2', cursive;
+        }
+
+        .card-profile .card-button {
+            background: linear-gradient(135deg, #FF6B9D 0%, #FF1744 100%);
+        }
+
+        .card-quiz .card-button {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+        }
+
+        .card-map .card-button {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        }
+
+        .card-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* Sección de información */
+        .info-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(227, 242, 253, 0.95) 100%);
+            border-radius: 40px;
+            padding: 50px 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            border: 6px solid #2196F3;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .info-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 3em;
+            color: #1565C0;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .info-text {
+            font-size: 1.3em;
+            color: #1976D2;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            font-weight: 600;
+        }
+
+        /* Contenedores showcase */
+        .bins-showcase {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 60px;
+        }
+
+        .bin-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            border: 5px solid;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .bin-card:nth-child(1) { animation-delay: 0.4s; }
+        .bin-card:nth-child(2) { animation-delay: 0.5s; }
+        .bin-card:nth-child(3) { animation-delay: 0.6s; }
+        .bin-card:nth-child(4) { animation-delay: 0.7s; }
+
+        .bin-card:hover {
+            transform: translateY(-10px) rotate(2deg);
+        }
+
+        .bin-yellow {
+            border-color: #FFC107;
+            background: linear-gradient(135deg, rgba(255, 249, 196, 0.95) 0%, rgba(255, 241, 118, 0.95) 100%);
+        }
+
+        .bin-green {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95) 0%, rgba(200, 230, 201, 0.95) 100%);
+        }
+
+        .bin-blue {
+            border-color: #2196F3;
+            background: linear-gradient(135deg, rgba(227, 242, 253, 0.95) 0%, rgba(187, 222, 251, 0.95) 100%);
+        }
+
+        .bin-red {
+            border-color: #F44336;
+            background: linear-gradient(135deg, rgba(255, 235, 238, 0.95) 0%, rgba(255, 205, 210, 0.95) 100%);
+        }
+
+        .bin-image {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin: 0 auto 15px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        }
+
+        .bin-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6em;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .bin-yellow .bin-title { color: #F57F17; }
+        .bin-green .bin-title { color: #1B5E20; }
+        .bin-blue .bin-title { color: #0D47A1; }
+        .bin-red .bin-title { color: #B71C1C; }
+
+        .bin-description {
+            font-size: 1em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Estrellas decorativas */
+        .sparkle {
+            position: fixed;
+            font-size: 2.5em;
             animation: sparkle 3s infinite ease-in-out;
             pointer-events: none;
             z-index: 5;
@@ -48,354 +485,135 @@
 
         .sparkle1 { top: 15%; left: 10%; animation-delay: 0s; }
         .sparkle2 { top: 25%; right: 15%; animation-delay: 1s; }
-        .sparkle3 { top: 40%; left: 20%; animation-delay: 2s; }
-        .sparkle4 { top: 35%; right: 25%; animation-delay: 1.5s; }
+        .sparkle3 { top: 60%; left: 20%; animation-delay: 2s; }
+        .sparkle4 { top: 70%; right: 25%; animation-delay: 1.5s; }
 
         @keyframes sparkle {
             0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
             50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
         }
 
-        /* Nubes flotantes */
-        .cloud-emoji {
-            position: absolute;
-            font-size: 4em;
-            animation: floatCloud 40s infinite linear;
-            pointer-events: none;
-            z-index: 2;
-            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.1));
-        }
-
-        .cloud-emoji1 { top: 8%; left: -100px; animation-delay: 0s; }
-        .cloud-emoji2 { top: 20%; left: -150px; animation-delay: 15s; }
-
-        @keyframes floatCloud {
-            0% { left: -100px; }
-            100% { left: 110%; }
-        }
-
-        /* Logo esquina superior izquierda */
-        .logo-corner {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            animation: bounce 3s infinite ease-in-out;
-        }
-
-        .logo-corner img {
-            width: 140px;
-            height: auto;
-            filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.3));
-            transition: transform 0.3s;
-        }
-
-        .logo-corner:hover img {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .main-title {
-            position: absolute;
-            top: 12%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            text-align: center;
-        }
-
-        .main-title h1 {
-            font-family: 'Baloo 2', 'Fredoka', cursive;
-            font-weight: 800;
-            font-size: 5em;
-            color: #ffffffff;
-            text-shadow: 
-                4px 4px 0 #FF6B9D,
-                8px 8px 0 #4A90E2,
-                12px 12px 20px rgba(0,0,0,0.3);
-            animation: wiggle 2s infinite ease-in-out;
-            letter-spacing: 5px;
-            line-height: 1.2;
-        }
-
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(-2deg); }
-            50% { transform: rotate(2deg); }
-        }
-
-        /* Botones de navegación tipo bloques de juguete */
-        .nav-blocks {
-            position: absolute;
-            top: 50%;
-            left: 10%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            z-index: 10;
-        }
-
-        .nav-block {
-            position: relative;
-        }
-
-        .nav-block a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 20px 35px;
-            text-decoration: none;
-            font-family: 'Baloo 2', cursive;
-            font-weight: 700;
-            font-size: 1.8em;
-            color: white;
-            border-radius: 20px;
-            border: 5px solid rgba(0,0,0,0.2);
-            box-shadow: 
-                0 8px 0 rgba(0,0,0,0.2),
-                0 12px 25px rgba(0,0,0,0.3);
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-block a::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.3);
-            transition: left 0.3s;
-        }
-
-        .nav-block a:hover::before {
-            left: 100%;
-        }
-
-        .nav-block a:hover {
-            transform: translateY(-5px);
-            box-shadow: 
-                0 12px 0 rgba(0,0,0,0.2),
-                0 18px 30px rgba(0,0,0,0.4);
-        }
-
-        .nav-block a:active {
-            transform: translateY(4px);
-            box-shadow: 
-                0 2px 0 rgba(0,0,0,0.2),
-                0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        /* Colores diferentes para cada botón */
-        .nav-perfil a {
-            background: linear-gradient(135deg, #FF6B9D 0%, #FF1744 100%);
-        }
-
-        .nav-quiz a {
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-        }
-
-        .nav-mapa a {
-            background: linear-gradient(135deg, #FFA726 0%, #F57C00 100%);
-        }
-
-        .nav-about a {
-            background: linear-gradient(135deg, #42A5F5 0%, #1976D2 100%);
-        }
-
-        .nav-icon {
-            font-size: 1.5em;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        /* Personaje amigable */
-        .character {
-            position: absolute;
-            right: 40%;
-            bottom: 5%;
-            z-index: 10;
-        }
-
-        .character-img {
-            width: 450px;
-            height: auto;
-            filter: drop-shadow(10px 10px 25px rgba(0,0,0,0.3));
-            animation: characterFloat 4s infinite ease-in-out;
-        }
-
-        @keyframes characterFloat {
-            0%, 100% { transform: translateY(0) rotate(-2deg); }
-            50% { transform: translateY(-20px) rotate(2deg); }
-        }
-
-        /* Mariposas volando */
-        .butterfly {
-            position: absolute;
-            font-size: 2.5em;
-            animation: fly 20s infinite ease-in-out;
-            z-index: 6;
-        }
-
-        .butterfly1 {
-            top: 30%;
-            left: -50px;
-            animation: fly1 25s infinite ease-in-out;
-        }
-
-        @keyframes fly1 {
-            0% { left: -50px; top: 30%; }
-            25% { left: 30%; top: 25%; }
-            50% { left: 60%; top: 35%; }
-            75% { left: 80%; top: 28%; }
-            100% { left: 110%; top: 30%; }
-        }
-
-        /* Flores en el suelo */
-        .flowers {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            font-size: 3em;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 5%;
-            z-index: 4;
-        }
-
-        .flower {
-            animation: flowerGrow 3s infinite ease-in-out;
-        }
-
-        .flower:nth-child(2) { animation-delay: 0.5s; }
-        .flower:nth-child(3) { animation-delay: 1s; }
-        .flower:nth-child(4) { animation-delay: 1.5s; }
-
-        @keyframes flowerGrow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Responsivo */
-        @media (max-width: 1200px) {
-            .main-title h1 { font-size: 4em; }
-            .nav-blocks { left: 5%; }
-            .nav-block a { font-size: 1.5em; padding: 18px 30px; }
-            .character-img { width: 350px; }
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
         }
 
         @media (max-width: 768px) {
-            .logo-corner img { width: 90px; }
-            .main-title { top: 15%; }
-            .main-title h1 { 
-                font-size: 2.5em; 
-                text-shadow: 
-                    3px 3px 0 #FF6B9D,
-                    6px 6px 0 #4A90E2,
-                    9px 9px 15px rgba(0,0,0,0.3);
+            .header {
+                padding: 10px 15px;
             }
-            .nav-blocks {
-                top: auto;
-                bottom: 15%;
-                left: 50%;
-                transform: translateX(-50%);
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-                width: 90%;
-            }
-            .nav-block a {
-                font-size: 1.2em;
-                padding: 15px 20px;
-                flex: 1 1 45%;
-                justify-content: center;
-            }
-            .character {
-                right: 50%;
-                transform: translateX(50%);
-                bottom: 35%;
-            }
-            .character-img { width: 250px; }
-            .flowers { font-size: 2em; }
-        }
 
-        @media (max-width: 480px) {
-            .main-title h1 { font-size: 2em; }
-            .nav-block a { font-size: 1em; padding: 12px 15px; }
-            .character-img { width: 180px; }
+            .logo-header img {
+                width: 50px;
+            }
+
+            .logo-header h1 {
+                font-size: 1.4em;
+            }
+
+            .main-container {
+                margin-top: 80px;
+                padding: 20px;
+            }
+
+            .hero-title {
+                font-size: 2.5em;
+                text-shadow: 
+                    3px 3px 0 #2E7D32,
+                    6px 6px 0 #FF9800,
+                    9px 9px 15px rgba(0,0,0,0.4);
+            }
+
+            .hero-subtitle {
+                font-size: 1.3em;
+            }
+
+            .cta-button {
+                font-size: 1.6em;
+                padding: 20px 40px;
+            }
+
+            .info-title {
+                font-size: 2em;
+            }
+
+            .info-text {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Estrellas brillantes -->
+    <!-- Estrellas decorativas -->
     <div class="sparkle sparkle1">✨</div>
     <div class="sparkle sparkle2">⭐</div>
-    <div class="sparkle sparkle3">✨</div>
-    <div class="sparkle sparkle4">⭐</div>
+    <div class="sparkle sparkle3">🌟</div>
+    <div class="sparkle sparkle4">✨</div>
 
-    <!-- Nubes (reducidas) -->
-    <div class="cloud-emoji cloud-emoji1">☁️</div>
-    <div class="cloud-emoji cloud-emoji2">☁️</div>
-
-    <!-- Mariposa (reducida a 1) -->
-    <div class="butterfly butterfly1">🦋</div>
-
-    <!-- Logo esquina -->
-    <div class="logo-corner">
-        <img src="{% static 'icons/ecologo.png' %}" alt="EcoLogic">
-    </div>
-
-    <!-- Título principal -->
-    <div class="main-title">
-        <h1>¡APRENDE A<br>RECICLAR!</h1>
-    </div>
-
-    <!-- Botones de navegación -->
-    <div class="nav-blocks">
-        <div class="nav-block nav-perfil">
-            <a href="{% url 'profile' %}">
-                <span class="nav-icon"></span>
-                <span>Mi Perfil</span>
-            </a>
-        </div>
-        <div class="nav-block nav-quiz">
-            <a href="recycler/">
-                <span class="nav-icon"></span>
-                <span>Jugar Quiz</span>
-            </a>
-        </div>
-        <div class="nav-block nav-mapa">
-            <a href="{% url 'map' %}">
-                <span class="nav-icon"></span>
-                <span>Mapa Verde</span>
-            </a>
-        </div>
-        <div class="nav-block nav-about">
-            <a href="about/">
-                <span class="nav-icon"></span>
-                <span>Sobre Nosotros</span>
-            </a>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-header">
+            <img src="{% static 'icons/logo_ecologic.png' %}" alt="EcoLogic">
+            <h1>EcoLogic</h1>
         </div>
     </div>
 
-    <!-- Personaje -->
-    <div class="character">
-        <img src="{% static 'icons/character.png' %}" alt="Amigo EcoLogic" class="character-img">
-    </div>
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">♻️ ¡APRENDE A<br>RECICLAR! ♻️</h1>
+            <p class="hero-subtitle">Juega, aprende y salva el planeta 🌍</p>
+            <a href="{% url 'recycler' %}" class="cta-button">
+                🎮 ¡JUGAR AHORA!
+            </a>
+        </div>
 
-    <!-- Flores (reducidas) -->
-    <div class="flowers">
-        <span class="flower"></span>
-        <span class="flower"></span>
-        <span class="flower"></span>
-        <span class="flower"></span>
+        <!-- Cards principales -->
+        <div class="cards-grid">
+            <div class="feature-card card-profile">
+                <div class="card-icon">👤</div>
+                <h2 class="card-title">Tu Perfil</h2>
+                <p class="card-description">
+                    Mira tus estadísticas, puntajes y cuántas veces has jugado. ¡Conviértete en un campeón del reciclaje!
+                </p>
+                <a href="{% url 'profile' %}" class="card-button">Ver Perfil</a>
+            </div>
+
+            <div class="feature-card card-quiz">
+                <div class="card-icon">🎮</div>
+                <h2 class="card-title">Quiz de Reciclaje</h2>
+                <p class="card-description">
+                    Responde preguntas sobre qué va en cada contenedor. ¡Gana puntos y aprende jugando!
+                </p>
+                <a href="{% url 'recycler' %}" class="card-button">Jugar Quiz</a>
+            </div>
+
+            <div class="feature-card card-map">
+                <div class="card-icon">🗺️</div>
+                <h2 class="card-title">Puntos Verdes</h2>
+                <p class="card-description">
+                    Encuentra centros de reciclaje cerca de ti. ¡Lleva tus materiales al lugar correcto!
+                </p>
+                <a href="{% url 'map' %}" class="card-button">Ver Mapa</a>
+            </div>
+        </div>
+
+        <!-- Información -->
+        <div class="info-section">
+            <h2 class="info-title">
+                <span>🌍</span>
+                <span>¿Por qué es importante reciclar?</span>
+            </h2>
+            <p class="info-text">
+                Reciclar ayuda a <strong>cuidar nuestro planeta</strong>. Cuando separamos la basura correctamente, 
+                los materiales pueden convertirse en cosas nuevas en lugar de contaminar la naturaleza. 
+                <strong>¡Cada pequeña acción cuenta!</strong>
+            </p>
+        </div>
     </div>
 </body>
 </html>
